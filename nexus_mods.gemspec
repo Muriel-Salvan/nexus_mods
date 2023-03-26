@@ -33,4 +33,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop', '~> 1.48'
   # Lint checker for rspec
   spec.add_development_dependency 'rubocop-rspec', '~> 2.19'
+  # Automatic semantic releasing
+  spec.add_development_dependency 'sem_ver_components', '~> 0.3'
 end
