@@ -1,0 +1,5 @@
+class NexusMods
+
+  VERSION = '0.0.1'
+
+end
