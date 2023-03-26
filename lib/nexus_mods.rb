@@ -51,7 +51,7 @@ class NexusMods
     gecko_driver_path: nil,
     firefox_bin_path: nil,
     non_api_cookie: nil,
-    logger: Logger.new(STDOUT)
+    logger: Logger.new($stdout)
   )
     @api_key = api_key
     @game_domain_name = game_domain_name
@@ -114,7 +114,7 @@ class NexusMods
           ]
         ]
       end
-      categories.values.each do |(category, parent_category_id)|
+      categories.each_value do |(category, parent_category_id)|
         category.parent_category = categories[parent_category_id].first if parent_category_id
       end
       Game.new(
@@ -195,13 +195,14 @@ class NexusMods
     api("games/#{game_domain_name}/mods/#{mod_id}/files")['files'].map do |file_json|
       category_id = FILE_CATEGORIES[file_json['category_id']]
       raise "Unknown file category: #{file_json['category_id']}" if category_id.nil?
+
       ModFile.new(
         ids: file_json['id'],
         uid: file_json['uid'],
         id: file_json['file_id'],
         name: file_json['name'],
         version: file_json['version'],
-        category_id: category_id,
+        category_id:,
         category_name: file_json['category_name'],
         is_primary: file_json['is_primary'],
         size: file_json['size_in_bytes'],
@@ -226,14 +227,14 @@ class NexusMods
   # Result::
   # * Object: The JSON response
   def api(path, verb: :get)
-    res = http(path, verb: verb)
+    res = http(path, verb:)
     json = JSON.parse(res.body)
     uri = api_uri(path)
     @logger.debug "[API call] - #{verb} #{uri} => #{res.status}\n#{
         JSON.
           pretty_generate(json).
           split("\n").
-          map { |line| "  #{line}"}.
+          map { |line| "  #{line}" }.
           join("\n")
       }\n#{
         res.

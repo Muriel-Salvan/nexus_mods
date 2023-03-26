@@ -8,7 +8,7 @@ module NexusModsTests
   module Helpers
 
     # Integer: Mocked user ID
-    MOCKED_USER_ID = 1234567
+    MOCKED_USER_ID = 1_234_567
 
     # String: Mocked API key
     MOCKED_API_KEY = '1234567891234566546543123546879s8df46s5df4sd5f4sd6f87wer9f846sf54sd65v16x5v48r796rwe84f654f35sd1v5df6v54687rUGZWcG0rdz09--62dcd41bb308d2d660548a3cd1ef4094162c4379'
@@ -128,7 +128,7 @@ end
 
 RSpec.configure do |config|
   config.include NexusModsTests::Helpers
-  config.before :each do
+  config.before do
     @nexus_mods = nil
     # Keep a list of the etags we should have returned, so that we know when queries should contain them
     # Array<String>
@@ -137,4 +137,4 @@ RSpec.configure do |config|
 end
 
 # Set a bigger output length for expectation errors, as most error messages include API keys and headers which can be lengthy
-RSpec::Support::ObjectFormatter.default_instance.max_formatted_output_length = 16384
+RSpec::Support::ObjectFormatter.default_instance.max_formatted_output_length = 16_384

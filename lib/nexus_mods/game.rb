@@ -5,7 +5,7 @@ class NexusMods
   # * https://github.com/Nexus-Mods/node-nexus-api/blob/master/docs/interfaces/_types_.igameinfo.md
   class Game
 
-    attr_reader *%i[
+    attr_reader(*%i[
       id
       name
       forum_url
@@ -20,7 +20,7 @@ class NexusMods
       authors_count
       mods_count
       categories
-    ]
+    ])
 
     # Constructor
     #

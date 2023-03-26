@@ -13,13 +13,13 @@ describe NexusMods do
             'forum_url' => 'https://forums.nexusmods.com/index.php?/forum/111-morrowind/',
             'nexusmods_url' => 'http://www.nexusmods.com/morrowind',
             'genre' => 'RPG',
-            'file_count' => 14143,
-            'downloads' => 20414985,
+            'file_count' => 14_143,
+            'downloads' => 20_414_985,
             'domain_name' => 'morrowind',
             'approved_date' => 1,
-            'file_views' => 100014750,
+            'file_views' => 100_014_750,
             'authors' => 2062,
-            'file_endorsements' => 719262,
+            'file_endorsements' => 719_262,
             'mods' => 6080,
             'categories' => [
               {
@@ -40,14 +40,14 @@ describe NexusMods do
             'forum_url' => 'https://forums.nexusmods.com/index.php?/forum/131-oblivion/',
             'nexusmods_url' => 'http://www.nexusmods.com/oblivion',
             'genre' => 'RPG',
-            'file_count' => 52775,
-            'downloads' => 187758634,
+            'file_count' => 52_775,
+            'downloads' => 187_758_634,
             'domain_name' => 'oblivion',
             'approved_date' => 1,
-            'file_views' => 880508188,
-            'authors' => 10673,
-            'file_endorsements' => 4104067,
-            'mods' => 29220,
+            'file_views' => 880_508_188,
+            'authors' => 10_673,
+            'file_endorsements' => 4_104_067,
+            'mods' => 29_220,
             'categories' => [
               {
                 'category_id' => 20,
@@ -63,7 +63,7 @@ describe NexusMods do
           }
         ]
       )
-      games = nexus_mods.games.sort_by { |game| game.id }
+      games = nexus_mods.games.sort_by(&:id)
       expect(games.size).to eq 2
       first_game = games.first
       expect(first_game.id).to eq 100
@@ -71,13 +71,13 @@ describe NexusMods do
       expect(first_game.forum_url).to eq 'https://forums.nexusmods.com/index.php?/forum/111-morrowind/'
       expect(first_game.nexusmods_url).to eq 'http://www.nexusmods.com/morrowind'
       expect(first_game.genre).to eq 'RPG'
-      expect(first_game.files_count).to eq 14143
-      expect(first_game.downloads_count).to eq 20414985
+      expect(first_game.files_count).to eq 14_143
+      expect(first_game.downloads_count).to eq 20_414_985
       expect(first_game.domain_name).to eq 'morrowind'
       expect(first_game.approved_date).to eq Time.parse('1970-01-01 00:00:01 +0000')
-      expect(first_game.files_views).to eq 100014750
+      expect(first_game.files_views).to eq 100_014_750
       expect(first_game.authors_count).to eq 2062
-      expect(first_game.files_endorsements).to eq 719262
+      expect(first_game.files_endorsements).to eq 719_262
       expect(first_game.mods_count).to eq 6080
       first_game_categories = first_game.categories
       expect(first_game_categories.size).to eq 2
@@ -96,14 +96,14 @@ describe NexusMods do
       expect(second_game.forum_url).to eq 'https://forums.nexusmods.com/index.php?/forum/131-oblivion/'
       expect(second_game.nexusmods_url).to eq 'http://www.nexusmods.com/oblivion'
       expect(second_game.genre).to eq 'RPG'
-      expect(second_game.files_count).to eq 52775
-      expect(second_game.downloads_count).to eq 187758634
+      expect(second_game.files_count).to eq 52_775
+      expect(second_game.downloads_count).to eq 187_758_634
       expect(second_game.domain_name).to eq 'oblivion'
       expect(second_game.approved_date).to eq Time.parse('1970-01-01 00:00:01 +0000')
-      expect(second_game.files_views).to eq 880508188
-      expect(second_game.authors_count).to eq 10673
-      expect(second_game.files_endorsements).to eq 4104067
-      expect(second_game.mods_count).to eq 29220
+      expect(second_game.files_views).to eq 880_508_188
+      expect(second_game.authors_count).to eq 10_673
+      expect(second_game.files_endorsements).to eq 4_104_067
+      expect(second_game.mods_count).to eq 29_220
       second_game_categories = second_game.categories
       expect(second_game_categories.size).to eq 2
       expect(second_game_categories.first.id).to eq 20

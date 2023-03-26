@@ -5,7 +5,7 @@ class NexusMods
   # * https://github.com/Nexus-Mods/node-nexus-api/blob/master/docs/interfaces/_types_.imodinfo.md
   class Mod
 
-    attr_reader *%i[
+    attr_reader(*%i[
       uid
       mod_id
       game_id
@@ -27,7 +27,7 @@ class NexusMods
       downloads_count
       unique_downloads_count
       endorsements_count
-    ]
+    ])
 
     # Constructor
     #

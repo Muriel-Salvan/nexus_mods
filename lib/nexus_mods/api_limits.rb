@@ -3,14 +3,14 @@ class NexusMods
   # Object giving the NexusMods API limits
   class ApiLimits
 
-    attr_reader *%i[
+    attr_reader(*%i[
       daily_limit
       daily_remaining
       daily_reset
       hourly_limit
       hourly_remaining
       hourly_reset
-    ]
+    ])
 
     # Constructor
     #

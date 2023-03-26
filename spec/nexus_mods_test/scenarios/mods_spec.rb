@@ -8,19 +8,19 @@ describe NexusMods do
       'summary' => 'New Female and Male Hairstyles for Humans, Elves and Orcs. Converted hair from Sims2 and Sims3.<br />Standalone version.',
       'description' => 'Mod description',
       'picture_url' => 'https://staticdelivery.nexusmods.com/mods/1704/images/10168-1-1392817986.jpg',
-      'mod_downloads': 13634545,
-      'mod_unique_downloads': 4052221,
-      'uid': 7318624272650,
+      'mod_downloads' => 13_634_545,
+      'mod_unique_downloads' => 4_052_221,
+      'uid' => 7_318_624_272_650,
       'mod_id' => 2014,
       'game_id' => 1704,
-      'allow_rating': true,
+      'allow_rating' => true,
       'domain_name' => 'skyrimspecialedition',
       'category_id' => 26,
       'version' => '1.6.Full',
-      'endorsement_count': 298845,
-      'created_timestamp' => 1477972056,
+      'endorsement_count' => 298_845,
+      'created_timestamp' => 1_477_972_056,
       'created_time' => '2016-11-01T03:47:36.000+00:00',
-      'updated_timestamp' => 1507398546,
+      'updated_timestamp' => 1_507_398_546,
       'updated_time' => '2017-10-07T17:49:06.000+00:00',
       'author' => 'Apachii',
       'uploaded_by' => 'apachii',
@@ -29,7 +29,7 @@ describe NexusMods do
       'status' => 'published',
       'available' => true,
       'user' => {
-        'member_id' => 283148,
+        'member_id' => 283_148,
         'member_group_id' => 27,
         'name' => 'apachii'
       },
@@ -42,19 +42,19 @@ describe NexusMods do
 
     # Example of JSON object returned by the API for a mod information, having minimum fields
     JSON_PARTIAL_MOD = {
-      'mod_downloads': 13634545,
-      'mod_unique_downloads': 4052221,
-      'uid': 7318624272650,
+      'mod_downloads' => 13_634_545,
+      'mod_unique_downloads' => 4_052_221,
+      'uid' => 7_318_624_272_650,
       'mod_id' => 2014,
       'game_id' => 1704,
-      'allow_rating': true,
+      'allow_rating' => true,
       'domain_name' => 'skyrimspecialedition',
       'category_id' => 26,
       'version' => '1.6.Full',
-      'endorsement_count': 298845,
-      'created_timestamp' => 1477972056,
+      'endorsement_count' => 298_845,
+      'created_timestamp' => 1_477_972_056,
       'created_time' => '2016-11-01T03:47:36.000+00:00',
-      'updated_timestamp' => 1507398546,
+      'updated_timestamp' => 1_507_398_546,
       'updated_time' => '2017-10-07T17:49:06.000+00:00',
       'author' => 'Apachii',
       'uploaded_by' => 'apachii',
@@ -63,7 +63,7 @@ describe NexusMods do
       'status' => 'published',
       'available' => true,
       'user' => {
-        'member_id' => 283148,
+        'member_id' => 283_148,
         'member_group_id' => 27,
         'name' => 'apachii'
       }
@@ -78,23 +78,23 @@ describe NexusMods do
       expect(mod.summary).to eq 'New Female and Male Hairstyles for Humans, Elves and Orcs. Converted hair from Sims2 and Sims3.<br />Standalone version.'
       expect(mod.description).to eq 'Mod description'
       expect(mod.picture_url).to eq 'https://staticdelivery.nexusmods.com/mods/1704/images/10168-1-1392817986.jpg'
-      expect(mod.downloads_count).to eq 13634545
-      expect(mod.unique_downloads_count).to eq 4052221
-      expect(mod.uid).to eq 7318624272650
+      expect(mod.downloads_count).to eq 13_634_545
+      expect(mod.unique_downloads_count).to eq 4_052_221
+      expect(mod.uid).to eq 7_318_624_272_650
       expect(mod.mod_id).to eq 2014
       expect(mod.game_id).to eq 1704
-      expect(mod.allow_rating).to eq true
+      expect(mod.allow_rating).to be true
       expect(mod.domain_name).to eq 'skyrimspecialedition'
       expect(mod.category_id).to eq 26
       expect(mod.version).to eq '1.6.Full'
-      expect(mod.endorsements_count).to eq 298845
+      expect(mod.endorsements_count).to eq 298_845
       expect(mod.created_time).to eq Time.parse('2016-11-01T03:47:36.000+00:00')
       expect(mod.updated_time).to eq Time.parse('2017-10-07T17:49:06.000+00:00')
       expect(mod.author).to eq 'Apachii'
-      expect(mod.contains_adult_content).to eq false
+      expect(mod.contains_adult_content).to be false
       expect(mod.status).to eq 'published'
-      expect(mod.available).to eq true
-      expect(mod.uploader.member_id).to eq 283148
+      expect(mod.available).to be true
+      expect(mod.uploader.member_id).to eq 283_148
       expect(mod.uploader.member_group_id).to eq 27
       expect(mod.uploader.name).to eq 'apachii'
       expect(mod.uploader.profile_url).to eq 'http://www.nexusmods.com/games/users/283148'
@@ -109,23 +109,23 @@ describe NexusMods do
       expect(mod.summary).to be_nil
       expect(mod.description).to be_nil
       expect(mod.picture_url).to be_nil
-      expect(mod.downloads_count).to eq 13634545
-      expect(mod.unique_downloads_count).to eq 4052221
-      expect(mod.uid).to eq 7318624272650
+      expect(mod.downloads_count).to eq 13_634_545
+      expect(mod.unique_downloads_count).to eq 4_052_221
+      expect(mod.uid).to eq 7_318_624_272_650
       expect(mod.mod_id).to eq 2014
       expect(mod.game_id).to eq 1704
-      expect(mod.allow_rating).to eq true
+      expect(mod.allow_rating).to be true
       expect(mod.domain_name).to eq 'skyrimspecialedition'
       expect(mod.category_id).to eq 26
       expect(mod.version).to eq '1.6.Full'
-      expect(mod.endorsements_count).to eq 298845
+      expect(mod.endorsements_count).to eq 298_845
       expect(mod.created_time).to eq Time.parse('2016-11-01T03:47:36.000+00:00')
       expect(mod.updated_time).to eq Time.parse('2017-10-07T17:49:06.000+00:00')
       expect(mod.author).to eq 'Apachii'
-      expect(mod.contains_adult_content).to eq false
+      expect(mod.contains_adult_content).to be false
       expect(mod.status).to eq 'published'
-      expect(mod.available).to eq true
-      expect(mod.uploader.member_id).to eq 283148
+      expect(mod.available).to be true
+      expect(mod.uploader.member_id).to eq 283_148
       expect(mod.uploader.member_group_id).to eq 27
       expect(mod.uploader.name).to eq 'apachii'
       expect(mod.uploader.profile_url).to eq 'http://www.nexusmods.com/games/users/283148'

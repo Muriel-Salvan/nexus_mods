@@ -3,14 +3,14 @@ class NexusMods
   # Categories defined for a game in NexusMods
   class Category
 
-    attr_reader *%i[
+    attr_reader(*%i[
       id
       name
-    ]
+    ])
 
-    attr_accessor *%i[
+    attr_accessor(*%i[
       parent_category
-    ]
+    ])
 
     # Constructor
     #
