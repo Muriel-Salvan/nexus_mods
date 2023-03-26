@@ -5,24 +5,26 @@ class NexusMods
   # * https://github.com/Nexus-Mods/node-nexus-api/blob/master/docs/interfaces/_types_.ifileinfo.md
   class ModFile
 
-    attr_reader(*%i[
-      ids
-      uid
-      id
-      name
-      version
-      category_id
-      category_name
-      is_primary
-      size
-      file_name
-      uploaded_time
-      mod_version
-      external_virus_scan_url
-      description
-      changelog_html
-      content_preview_url
-    ])
+    attr_reader(
+      *%i[
+        ids
+        uid
+        id
+        name
+        version
+        category_id
+        category_name
+        is_primary
+        size
+        file_name
+        uploaded_time
+        mod_version
+        external_virus_scan_url
+        description
+        changelog_html
+        content_preview_url
+      ]
+    )
 
     # Constructor
     #

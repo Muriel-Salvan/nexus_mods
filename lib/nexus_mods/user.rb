@@ -4,12 +4,14 @@ class NexusMods
   # Mainly used for uploaders information.
   class User
 
-    attr_reader(*%i[
-      member_id
-      member_group_id
-      name
-      profile_url
-    ])
+    attr_reader(
+      *%i[
+        member_id
+        member_group_id
+        name
+        profile_url
+      ]
+    )
 
     # Constructor
     #

@@ -10,6 +10,7 @@ require 'nexus_mods/user'
 require 'nexus_mods/mod'
 require 'nexus_mods/mod_file'
 
+# Ruby API to access NexusMods REST API
 class NexusMods
 
   # Error raised by the API calls

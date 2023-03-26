@@ -1,6 +1,6 @@
-describe NexusMods do
+describe NexusMods::Game do
 
-  context 'testing games' do
+  context 'when testing games' do
 
     it 'returns the games list' do
       expect_validate_user

@@ -5,29 +5,31 @@ class NexusMods
   # * https://github.com/Nexus-Mods/node-nexus-api/blob/master/docs/interfaces/_types_.imodinfo.md
   class Mod
 
-    attr_reader(*%i[
-      uid
-      mod_id
-      game_id
-      allow_rating
-      domain_name
-      category_id
-      version
-      created_time
-      updated_time
-      author
-      contains_adult_content
-      status
-      available
-      uploader
-      name
-      summary
-      description
-      picture_url
-      downloads_count
-      unique_downloads_count
-      endorsements_count
-    ])
+    attr_reader(
+      *%i[
+        uid
+        mod_id
+        game_id
+        allow_rating
+        domain_name
+        category_id
+        version
+        created_time
+        updated_time
+        author
+        contains_adult_content
+        status
+        available
+        uploader
+        name
+        summary
+        description
+        picture_url
+        downloads_count
+        unique_downloads_count
+        endorsements_count
+      ]
+    )
 
     # Constructor
     #
