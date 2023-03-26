@@ -40,27 +40,18 @@ class NexusMods
   # * *game_domain_name* (String): Game domain name to query by default [default: 'skyrimspecialedition']
   # * *mod_id* (Integer): Mod to query by default [default: 1]
   # * *file_id* (Integer): File to query by default [default: 1]
-  # * *gecko_driver_path* (String or nil): Path to the Gecko driver directory. This is only useful for non-premium users to download files. [default: nil]
-  # * *firefox_bin_path* (String or nil): Path to the Firefox binary. This is only useful for non-premium users to download files. [default: nil]
-  # * *non_api_cookie* (String or nil): A non-API cookie that can be used. This is only useful for non-premium users to download files. [default: nil]
   # * *logger* (Logger): The logger to be used for log messages [default: Logger.new(STDOUT)]
   def initialize(
     api_key: nil,
     game_domain_name: 'skyrimspecialedition',
     mod_id: 1,
     file_id: 1,
-    gecko_driver_path: nil,
-    firefox_bin_path: nil,
-    non_api_cookie: nil,
     logger: Logger.new($stdout)
   )
     @api_key = api_key
     @game_domain_name = game_domain_name
     @mod_id = mod_id
     @file_id = file_id
-    @gecko_driver_path = gecko_driver_path
-    @firefox_bin_path = firefox_bin_path
-    @non_api_cookie = non_api_cookie
     @logger = logger
     @premium = false
     # Initialize our HTTP client
