@@ -107,7 +107,8 @@ class NexusMods
         ]
       end
       categories.each_value do |(category, parent_category_id)|
-        category.parent_category = categories[parent_category_id].first if parent_category_id
+        # Ignore missing parent categories: this situation happens.
+        category.parent_category = categories[parent_category_id]&.first if parent_category_id
       end
       Game.new(
         id: game_json['id'],
