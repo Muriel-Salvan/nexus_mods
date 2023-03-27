@@ -1,3 +1,9 @@
+# [v0.1.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.1.0...v0.1.1) (2023-03-27 19:57:47)
+
+### Patches
+
+* [Support games having categories without parent category](https://github.com/Muriel-Salvan/nexus_mods/commit/eb19cf5edc424e82df72b7dc0092fa49d24368de)
+
 # [v0.1.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.0.1...v0.1.0) (2023-03-26 17:37:15)
 
 ### Patches
