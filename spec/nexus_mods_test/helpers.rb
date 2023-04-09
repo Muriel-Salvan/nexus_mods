@@ -1,9 +1,12 @@
 require 'digest'
 require 'webmock/rspec'
 require 'rspec/support/object_formatter'
+require 'nexus_mods_test/factories/games'
+require 'nexus_mods_test/factories/mods'
+require 'nexus_mods_test/factories/mod_files'
 require 'nexus_mods'
 
-module NexusModsTests
+module NexusModsTest
 
   module Helpers
 
@@ -72,6 +75,7 @@ module NexusModsTests
     # * *message* (String): Mocked returned message [default: 'OK']
     # * *json* (Object): Mocked JSON body [default: {}]
     # * *headers* (Hash<String,String>): Mocked additional HTTP headers [default: {}]
+    # * *times* (Integer): Number of times the call is expected [default: 1]
     def expect_http_call_to(
       host: 'api.nexusmods.com',
       http_method: :get,
@@ -80,7 +84,8 @@ module NexusModsTests
       code: 200,
       message: 'OK',
       json: {},
-      headers: {}
+      headers: {},
+      times: 1
     )
       json_as_str = json.to_json
       mocked_etag = "W/\"#{Digest::MD5.hexdigest("#{path}|#{json_as_str}")}\""
@@ -93,19 +98,25 @@ module NexusModsTests
       else
         @expected_returned_etags << mocked_etag
       end
-      stub_request(http_method, "https://#{host}#{path}").with(headers: expected_request_headers).to_return(
-        status: [code, message],
-        body: json_as_str,
-        headers: DEFAULT_API_HEADERS.
-          merge(
-            'etag' => mocked_etag
-          ).
-          merge(headers)
-      )
+      @expected_stubs << [
+        stub_request(http_method, "https://#{host}#{path}").with(headers: expected_request_headers).to_return(
+          status: [code, message],
+          body: json_as_str,
+          headers: DEFAULT_API_HEADERS.
+            merge(
+              'etag' => mocked_etag
+            ).
+            merge(headers)
+        ),
+        times
+      ]
     end
 
     # Expect a successfull call made to validate the user
-    def expect_validate_user
+    #
+    # Parameters::
+    # * *times* (Integer): Number of times the call is expected [default: 1]
+    def expect_validate_user(times: 1)
       expect_http_call_to(
         path: '/v1/users/validate.json',
         json: {
@@ -118,7 +129,8 @@ module NexusModsTests
           profile_url: 'https://www.nexusmods.com/Contents/Images/noavatar.gif',
           is_supporter: false,
           is_premium: false
-        }
+        },
+        times:
       )
     end
 
@@ -127,12 +139,18 @@ module NexusModsTests
 end
 
 RSpec.configure do |config|
-  config.include NexusModsTests::Helpers
+  config.include NexusModsTest::Helpers
+  config.include NexusModsTest::Factories::Games
+  config.include NexusModsTest::Factories::Mods
+  config.include NexusModsTest::Factories::ModFiles
   config.before do
     @nexus_mods = nil
     # Keep a list of the etags we should have returned, so that we know when queries should contain them
     # Array<String>
     @expected_returned_etags = []
+    # List of expected stubs and the number of times they were supposed to mock
+    # Array< [ WebMock::RequestStub, Integer ] >
+    @expected_stubs = []
   end
 end
 

@@ -3,12 +3,12 @@ require 'json'
 require 'time'
 require 'tmpdir'
 require 'faraday'
-require 'nexus_mods/api_limits'
-require 'nexus_mods/category'
-require 'nexus_mods/game'
-require 'nexus_mods/user'
-require 'nexus_mods/mod'
-require 'nexus_mods/mod_file'
+require 'nexus_mods/api/api_limits'
+require 'nexus_mods/api/category'
+require 'nexus_mods/api/game'
+require 'nexus_mods/api/user'
+require 'nexus_mods/api/mod'
+require 'nexus_mods/api/mod_file'
 
 # Ruby API to access NexusMods REST API
 class NexusMods
@@ -75,7 +75,7 @@ class NexusMods
   # * ApiLimits: API calls limits
   def api_limits
     api_limits_headers = http('users/validate').headers
-    ApiLimits.new(
+    Api::ApiLimits.new(
       daily_limit: Integer(api_limits_headers['x-rl-daily-limit']),
       daily_remaining: Integer(api_limits_headers['x-rl-daily-remaining']),
       daily_reset: Time.parse(api_limits_headers['x-rl-daily-reset']).utc,
@@ -98,7 +98,7 @@ class NexusMods
         [
           category_id,
           [
-            Category.new(
+            Api::Category.new(
               id: category_id,
               name: category_json['name']
             ),
@@ -110,7 +110,7 @@ class NexusMods
         # Ignore missing parent categories: this situation happens.
         category.parent_category = categories[parent_category_id]&.first if parent_category_id
       end
-      Game.new(
+      Api::Game.new(
         id: game_json['id'],
         name: game_json['name'],
         forum_url: game_json['forum_url'],
@@ -138,7 +138,7 @@ class NexusMods
   # * Mod: Mod information
   def mod(game_domain_name: @game_domain_name, mod_id: @mod_id)
     mod_json = api "games/#{game_domain_name}/mods/#{mod_id}"
-    Mod.new(
+    Api::Mod.new(
       uid: mod_json['uid'],
       mod_id: mod_json['mod_id'],
       game_id: mod_json['game_id'],
@@ -152,7 +152,7 @@ class NexusMods
       contains_adult_content: mod_json['contains_adult_content'],
       status: mod_json['status'],
       available: mod_json['available'],
-      uploader: User.new(
+      uploader: Api::User.new(
         member_id: mod_json['user']['member_id'],
         member_group_id: mod_json['user']['member_group_id'],
         name: mod_json['user']['name'],
@@ -189,7 +189,7 @@ class NexusMods
       category_id = FILE_CATEGORIES[file_json['category_id']]
       raise "Unknown file category: #{file_json['category_id']}" if category_id.nil?
 
-      ModFile.new(
+      Api::ModFile.new(
         ids: file_json['id'],
         uid: file_json['uid'],
         id: file_json['file_id'],
