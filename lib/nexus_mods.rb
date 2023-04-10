@@ -225,9 +225,4 @@ class NexusMods
     end
   end
 
-  # TODO: Check http cache usefulness and either test it or remove it
-  # TODO: Check if attr_reader of mod_id and game_id is needed and remove it if not
-  # TODO: Find better cache keys
-  # TODO: Documentation and examples
-
 end

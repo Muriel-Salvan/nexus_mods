@@ -150,13 +150,16 @@ class NexusMods
     end
     cacheable_api(
       :cached_api,
+      key_format: proc do |_target, _method_name, method_args, method_kwargs|
+        "#{method_kwargs[:verb]}/#{method_args.first}"
+      end,
       expiry_from_key: proc do |key|
         # Example of keys:
-        # NexusMods::ApiClient/cached_api/games/verb:get
-        # NexusMods::ApiClient/cached_api/games/skyrimspecialedition/mods/2014/verb:get
-        # NexusMods::ApiClient/cached_api/games/skyrimspecialedition/mods/2014/files/verb:get
-        # NexusMods::ApiClient/cached_api/users/validate/verb:get
-        key_components = key.split('/')[2..-2]
+        # get/games
+        # get/games/skyrimspecialedition/mods/2014
+        # get/games/skyrimspecialedition/mods/2014/files
+        # get/users/validate
+        key_components = key.split('/')[1..]
         case key_components[0]
         when 'games'
           if key_components[1].nil?
