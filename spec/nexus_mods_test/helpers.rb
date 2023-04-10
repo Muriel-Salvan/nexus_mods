@@ -70,9 +70,9 @@ module NexusModsTest
     # Dump the output if needed for debugging purposes.
     def reset_nexus_mods
       if @nexus_mods && test_debug?
-        puts "===== NexusMods output BEGIN ====="
+        puts '===== NexusMods output BEGIN ====='
         puts @nexus_mods_logger.string
-        puts "===== NexusMods output END ====="
+        puts '===== NexusMods output END ====='
       end
       @nexus_mods = nil
     end
@@ -195,11 +195,9 @@ RSpec.configure do |config|
     end
   end
   config.around do |example|
-    begin
-      example.call
-    ensure
-      reset_nexus_mods
-    end
+    example.call
+  ensure
+    reset_nexus_mods
   end
 end
 
