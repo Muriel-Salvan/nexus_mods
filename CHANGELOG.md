@@ -1,3 +1,9 @@
+# [v0.4.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.3.0...v0.4.0) (2023-04-10 10:15:41)
+
+### Features
+
+* [[Feature] Add persistent API caching in files](https://github.com/Muriel-Salvan/nexus_mods/commit/f124ecf58b0f478ecdca5f6ad2309779d1ab67ac)
+
 # [v0.3.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.2.0...v0.3.0) (2023-04-10 09:13:43)
 
 ### Features
