@@ -1,3 +1,9 @@
+# [v0.6.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.5.1...v0.6.0) (2023-04-10 17:30:40)
+
+### Features
+
+* [[Feature] Provide accessors for the default game domain name and mod id](https://github.com/Muriel-Salvan/nexus_mods/commit/ee2ba5c4d3eccf1adae2cc781c5988625537c341)
+
 # [v0.5.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.5.0...v0.5.1) (2023-04-10 17:19:39)
 
 ### Patches
