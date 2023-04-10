@@ -12,6 +12,13 @@ class NexusMods
 
     include CacheableApi
 
+    # Default expiry times, in seconds
+    DEFAULT_API_CACHE_EXPIRY = {
+      games: 24 * 60 * 60,
+      mod: 24 * 60 * 60,
+      mod_files: 24 * 60 * 60
+    }
+
     # Constructor
     #
     # Parameters::
@@ -31,8 +38,9 @@ class NexusMods
       logger: Logger.new($stdout)
     )
       @api_key = api_key
-      ApiClient.api_cache_expiry = ApiClient.api_cache_expiry.merge(api_cache_expiry)
+      @api_cache_expiry = DEFAULT_API_CACHE_EXPIRY.merge(api_cache_expiry)
       @api_cache_file = api_cache_file
+      ApiClient.api_client = self
       @logger = logger
       # Initialize our HTTP client
       @http_cache = http_cache_file.nil? ? nil : FileCache.new(http_cache_file)
@@ -96,15 +104,15 @@ class NexusMods
         case key_components[0]
         when 'games'
           if key_components[1].nil?
-            ApiClient.api_cache_expiry[:games]
+            ApiClient.api_client.api_cache_expiry[:games]
           else
             case key_components[2]
             when 'mods'
               case key_components[4]
               when nil
-                ApiClient.api_cache_expiry[:mod]
+                ApiClient.api_client.api_cache_expiry[:mod]
               when 'files'
-                ApiClient.api_cache_expiry[:mod_files]
+                ApiClient.api_client.api_cache_expiry[:mod_files]
               else
                 raise "Unknown API path: #{key}"
               end
@@ -118,6 +126,9 @@ class NexusMods
         else
           raise "Unknown API path: #{key}"
         end
+      end,
+      on_cache_update: proc do
+        ApiClient.api_client.save_api_cache
       end
     )
 
@@ -146,26 +157,22 @@ class NexusMods
       return unless @api_cache_file
 
       FileUtils.mkdir_p(File.dirname(@api_cache_file))
-      Cacheable.cache_adapter.dump(@api_cache_file)
+      Cacheable.cache_adapter.save(@api_cache_file)
     end
+
+    # Some attributes exposed for the cacheable feature to work
+    attr_reader :api_cache_expiry
 
     private
 
     class << self
 
-      # Hash<Symbol,Integer>: Expiry time, per expiry key
-      attr_accessor :api_cache_expiry
+      # ApiClient: The API client to be used by the cacheable adapter (singleton pattern)
+      attr_accessor :api_client
 
     end
 
-    # Default expiry times, in seconds
-    DEFAULT_API_CACHE_EXPIRY = {
-      games: 24 * 60 * 60,
-      mod: 24 * 60 * 60,
-      mod_files: 24 * 60 * 60
-    }
-
-    @api_cache_expiry = DEFAULT_API_CACHE_EXPIRY
+    @api_client = nil
 
     # Get the real URI to query for a given API path
     #

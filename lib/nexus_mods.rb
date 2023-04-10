@@ -44,6 +44,7 @@ class NexusMods
   #   * *games*: Expiry associated to queries on games [default: 1 day]
   #   * *mod*: Expiry associated to queries on mod [default: 1 day]
   #   * *mod_files*: Expiry associated to queries on mod files [default: 1 day]
+  # * *api_cache_file* (String): File used to store the NexusMods API cache, or nil for no cache [default: "#{Dir.tmpdir}/nexus_mods_api_cache.json"]
   # * *logger* (Logger): The logger to be used for log messages [default: Logger.new(STDOUT)]
   def initialize(
     api_key: nil,
@@ -52,6 +53,7 @@ class NexusMods
     file_id: 1,
     http_cache_file: "#{Dir.tmpdir}/nexus_mods_http_cache.json",
     api_cache_expiry: {},
+    api_cache_file: "#{Dir.tmpdir}/nexus_mods_api_cache.json",
     logger: Logger.new($stdout)
   )
     @game_domain_name = game_domain_name
@@ -63,6 +65,7 @@ class NexusMods
       api_key:,
       http_cache_file:,
       api_cache_expiry:,
+      api_cache_file:,
       logger:
     )
 
