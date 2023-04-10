@@ -46,6 +46,7 @@ class NexusMods
   #   * *mod_files*: Expiry associated to queries on mod files [default: 1 day]
   # * *api_cache_file* (String): File used to store the NexusMods API cache, or nil for no cache [default: "#{Dir.tmpdir}/nexus_mods_api_cache.json"]
   # * *logger* (Logger): The logger to be used for log messages [default: Logger.new(STDOUT)]
+  # * *log_level* (Symbol): The logger level to be set [default: :info]
   def initialize(
     api_key: nil,
     game_domain_name: 'skyrimspecialedition',
@@ -54,12 +55,14 @@ class NexusMods
     http_cache_file: "#{Dir.tmpdir}/nexus_mods_http_cache.json",
     api_cache_expiry: {},
     api_cache_file: "#{Dir.tmpdir}/nexus_mods_api_cache.json",
-    logger: Logger.new($stdout)
+    logger: Logger.new($stdout),
+    log_level: :info
   )
     @game_domain_name = game_domain_name
     @mod_id = mod_id
     @file_id = file_id
     @logger = logger
+    @logger.level = log_level
     @premium = false
     @api_client = ApiClient.new(
       api_key:,
