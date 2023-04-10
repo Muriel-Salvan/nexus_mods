@@ -14,6 +14,7 @@ class NexusMods
           id
           name
           version
+          category
           category_id
           category_name
           is_primary
@@ -27,6 +28,17 @@ class NexusMods
           content_preview_url
         ]
       )
+
+      # Enum of file categories from the API
+      FILE_CATEGORIES = {
+        1 => :main,
+        2 => :patch,
+        3 => :optional,
+        4 => :old,
+        5 => :miscellaneous,
+        6 => :deleted,
+        7 => :archived
+      }
 
       # Constructor
       #
@@ -81,6 +93,8 @@ class NexusMods
         @description = description
         @changelog_html = changelog_html
         @content_preview_url = content_preview_url
+        # Extra fields for sugar
+        @category = FILE_CATEGORIES[category_id] || :unknown
       end
 
       # Equality operator
