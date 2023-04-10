@@ -1,3 +1,9 @@
+# [v0.2.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.1.1...v0.2.0) (2023-04-10 08:45:44)
+
+### Features
+
+* [[Feature] Make objects API comparable correctly](https://github.com/Muriel-Salvan/nexus_mods/commit/ff219c7050aa8421095c666fe2394c621f317e43)
+
 # [v0.1.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.1.0...v0.1.1) (2023-03-27 19:57:47)
 
 ### Patches
