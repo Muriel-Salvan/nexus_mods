@@ -1,3 +1,9 @@
+# [v0.5.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.5.0...v0.5.1) (2023-04-10 17:19:39)
+
+### Patches
+
+* [Use more efficient API cache keys](https://github.com/Muriel-Salvan/nexus_mods/commit/3f09a08b815c71a0b0ec6694359c02fd8503bc90)
+
 # [v0.5.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.4.0...v0.5.0) (2023-04-10 17:05:11)
 
 ### Features
