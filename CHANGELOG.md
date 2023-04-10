@@ -1,3 +1,9 @@
+# [v1.1.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v1.1.0...v1.1.1) (2023-04-10 19:39:28)
+
+### Patches
+
+* [Improved documentation and added examples](https://github.com/Muriel-Salvan/nexus_mods/commit/0eb3fd00e0d1ad34db04a30ab2043a49371dc64f)
+
 # [v1.1.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v1.0.0...v1.1.0) (2023-04-10 19:19:16)
 
 ### Features
