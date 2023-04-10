@@ -1,3 +1,9 @@
+# [v1.0.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.6.0...v1.0.0) (2023-04-10 19:03:51)
+
+### Breaking changes
+
+* [[Breaking] Keep category_id in mod files and use category for interpretation, including unknowns categories](https://github.com/Muriel-Salvan/nexus_mods/commit/a6b01df6d03d27ee880260e46884f09e6a497f1d)
+
 # [v0.6.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.5.1...v0.6.0) (2023-04-10 17:30:40)
 
 ### Features
