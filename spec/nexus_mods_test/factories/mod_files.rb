@@ -70,7 +70,8 @@ module NexusModsTest
         expect(mod_file.id).to eq 2472
         expect(mod_file.name).to eq 'ApachiiSkyHair_v_1_6_Full'
         expect(mod_file.version).to eq '1.6.Full'
-        expect(mod_file.category_id).to eq :old
+        expect(mod_file.category).to eq :old
+        expect(mod_file.category_id).to eq 4
         expect(mod_file.category_name).to eq 'OLD_VERSION'
         expect(mod_file.is_primary).to be false
         expect(mod_file.size).to eq 309_251_227
@@ -93,7 +94,8 @@ module NexusModsTest
         expect(mod_file.id).to eq 2487
         expect(mod_file.name).to eq 'ApachiiSkyHairMale_v_1_2'
         expect(mod_file.version).to eq '1.2'
-        expect(mod_file.category_id).to eq :old
+        expect(mod_file.category).to eq :old
+        expect(mod_file.category_id).to eq 4
         expect(mod_file.category_name).to eq 'OLD_VERSION'
         expect(mod_file.is_primary).to be false
         expect(mod_file.size).to eq 209_251_227

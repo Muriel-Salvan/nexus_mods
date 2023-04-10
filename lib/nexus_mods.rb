@@ -182,15 +182,6 @@ class NexusMods
     )
   end
 
-  # Enum of file categories from the API
-  FILE_CATEGORIES = {
-    1 => :main,
-    2 => :patch,
-    3 => :optional,
-    4 => :old,
-    6 => :deleted
-  }
-
   # Get files belonging to a mod
   #
   # Parameters::
@@ -201,16 +192,13 @@ class NexusMods
   # * Array<ModFile>: List of mod's files
   def mod_files(game_domain_name: @game_domain_name, mod_id: @mod_id, clear_cache: false)
     @api_client.api("games/#{game_domain_name}/mods/#{mod_id}/files", clear_cache:)['files'].map do |file_json|
-      category_id = FILE_CATEGORIES[file_json['category_id']]
-      raise "Unknown file category: #{file_json['category_id']}" if category_id.nil?
-
       Api::ModFile.new(
         ids: file_json['id'],
         uid: file_json['uid'],
         id: file_json['file_id'],
         name: file_json['name'],
         version: file_json['version'],
-        category_id:,
+        category_id: file_json['category_id'],
         category_name: file_json['category_name'],
         is_primary: file_json['is_primary'],
         size: file_json['size_in_bytes'],
