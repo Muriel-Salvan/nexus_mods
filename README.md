@@ -2,6 +2,17 @@
 
 Simple Ruby API letting you handle [NexusMods](https://www.nexusmods.com/) REST API.
 
+## Main features
+
+* Get the API **limits**.
+* Get the **games** information.
+* Get individual **mods** and **mod files** information.
+* Configurable **caching** with expiry times to save API calls to nexusmods.com.
+* All served in an object-oriented **API in full Ruby**.
+
+See the [examples](examples) for more details on how to use it.
+Those examples expect that you set a valid NexusMods API key in the `NEXUS_MODS_API_KEY` environment variable.
+
 ## Install
 
 Via gem
@@ -54,7 +65,7 @@ Any contribution is welcome:
 
 ## Credits
 
-- [Muriel Salvan][link-author]
+- [Muriel Salvan](https://x-aeon.com/muriel)
 
 ## License
 
