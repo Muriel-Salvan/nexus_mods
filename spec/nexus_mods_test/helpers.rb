@@ -66,12 +66,20 @@ module NexusModsTest
       @nexus_mods
     end
 
+    # Get NexusMods logs
+    #
+    # Result::
+    # * String: The NexusMods logs
+    def nexus_mods_logs
+      @nexus_mods_logger.string
+    end
+
     # Reset the NexusMods instance.
     # Dump the output if needed for debugging purposes.
     def reset_nexus_mods
       if @nexus_mods && test_debug?
         puts '===== NexusMods output BEGIN ====='
-        puts @nexus_mods_logger.string
+        puts nexus_mods_logs
         puts '===== NexusMods output END ====='
       end
       @nexus_mods = nil

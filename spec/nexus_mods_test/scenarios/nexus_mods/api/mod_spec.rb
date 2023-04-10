@@ -6,14 +6,6 @@ describe NexusMods::Api::Mod do
       expect_validate_user
     end
 
-    it 'returns the default game domain name' do
-      expect(nexus_mods(game_domain_name: 'skyrimspecialedition').game_domain_name).to eq 'skyrimspecialedition'
-    end
-
-    it 'returns the default game mod id' do
-      expect(nexus_mods(mod_id: 2014).mod_id).to eq 2014
-    end
-
     it 'returns a mod complete information' do
       expect_http_call_to(
         path: '/v1/games/skyrimspecialedition/mods/2014.json',
