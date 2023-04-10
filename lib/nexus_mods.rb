@@ -1,8 +1,7 @@
-require 'addressable/uri'
 require 'json'
 require 'time'
 require 'tmpdir'
-require 'faraday'
+require 'nexus_mods/api_client'
 require 'nexus_mods/api/api_limits'
 require 'nexus_mods/api/category'
 require 'nexus_mods/api/game'
@@ -40,27 +39,36 @@ class NexusMods
   # * *game_domain_name* (String): Game domain name to query by default [default: 'skyrimspecialedition']
   # * *mod_id* (Integer): Mod to query by default [default: 1]
   # * *file_id* (Integer): File to query by default [default: 1]
+  # * *http_cache_file* (String): File used to store the HTTP cache, or nil for no cache [default: "#{Dir.tmpdir}/nexus_mods_http_cache.json"]
+  # * *api_cache_expiry* (Hash<Symbol,Integer>): Expiry times in seconds, per expiry key. Possible keys are:
+  #   * *games*: Expiry associated to queries on games [default: 1 day]
+  #   * *mod*: Expiry associated to queries on mod [default: 1 day]
+  #   * *mod_files*: Expiry associated to queries on mod files [default: 1 day]
   # * *logger* (Logger): The logger to be used for log messages [default: Logger.new(STDOUT)]
   def initialize(
     api_key: nil,
     game_domain_name: 'skyrimspecialedition',
     mod_id: 1,
     file_id: 1,
+    http_cache_file: "#{Dir.tmpdir}/nexus_mods_http_cache.json",
+    api_cache_expiry: {},
     logger: Logger.new($stdout)
   )
-    @api_key = api_key
     @game_domain_name = game_domain_name
     @mod_id = mod_id
     @file_id = file_id
     @logger = logger
     @premium = false
-    # Initialize our HTTP client
-    @http_client = Faraday.new do |builder|
-      builder.adapter Faraday.default_adapter
-    end
+    @api_client = ApiClient.new(
+      api_key:,
+      http_cache_file:,
+      api_cache_expiry:,
+      logger:
+    )
+
     # Check that the key is correct and know if the user is premium
     begin
-      @premium = api('users/validate')['is_premium?']
+      @premium = @api_client.api('users/validate')['is_premium?']
     rescue LimitsExceededError
       raise
     rescue ApiError
@@ -74,7 +82,7 @@ class NexusMods
   # Result::
   # * ApiLimits: API calls limits
   def api_limits
-    api_limits_headers = http('users/validate').headers
+    api_limits_headers = @api_client.http('users/validate').headers
     Api::ApiLimits.new(
       daily_limit: Integer(api_limits_headers['x-rl-daily-limit']),
       daily_remaining: Integer(api_limits_headers['x-rl-daily-remaining']),
@@ -90,7 +98,7 @@ class NexusMods
   # Result::
   # * Array<Game>: List of games
   def games
-    api('games').map do |game_json|
+    @api_client.api('games').map do |game_json|
       # First create categories tree
       # Hash<Integer, [Category, Integer]>: Category and its parent category id, per category id
       categories = game_json['categories'].to_h do |category_json|
@@ -137,7 +145,7 @@ class NexusMods
   # Result::
   # * Mod: Mod information
   def mod(game_domain_name: @game_domain_name, mod_id: @mod_id)
-    mod_json = api "games/#{game_domain_name}/mods/#{mod_id}"
+    mod_json = @api_client.api "games/#{game_domain_name}/mods/#{mod_id}"
     Api::Mod.new(
       uid: mod_json['uid'],
       mod_id: mod_json['mod_id'],
@@ -185,7 +193,7 @@ class NexusMods
   # Result::
   # * Array<ModFile>: List of mod's files
   def mod_files(game_domain_name: @game_domain_name, mod_id: @mod_id)
-    api("games/#{game_domain_name}/mods/#{mod_id}/files")['files'].map do |file_json|
+    @api_client.api("games/#{game_domain_name}/mods/#{mod_id}/files")['files'].map do |file_json|
       category_id = FILE_CATEGORIES[file_json['category_id']]
       raise "Unknown file category: #{file_json['category_id']}" if category_id.nil?
 
@@ -208,68 +216,6 @@ class NexusMods
         content_preview_url: file_json['content_preview_link']
       )
     end
-  end
-
-  private
-
-  # Send an HTTP request to the API and get back the answer as a JSON
-  #
-  # Parameters::
-  # * *path* (String): API path to contact (from v1/ and without .json)
-  # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
-  # Result::
-  # * Object: The JSON response
-  def api(path, verb: :get)
-    res = http(path, verb:)
-    json = JSON.parse(res.body)
-    uri = api_uri(path)
-    @logger.debug "[API call] - #{verb} #{uri} => #{res.status}\n#{
-        JSON.
-          pretty_generate(json).
-          split("\n").
-          map { |line| "  #{line}" }.
-          join("\n")
-      }\n#{
-        res.
-          headers.
-          map { |header, value| "  #{header}: #{value}" }.
-          join("\n")
-      }"
-    case res.status
-    when 200
-      # Happy
-    when 429
-      # Some limits of the API have been reached
-      raise LimitsExceededError, "Exceeding limits of API calls: #{res.headers.select { |header, _value| header =~ /^x-rl-.+$/ }}"
-    else
-      raise ApiError, "API #{uri} returned error code #{res.status}" unless res.status == '200'
-    end
-    json
-  end
-
-  # Send an HTTP request to the API and get back the HTTP response
-  #
-  # Parameters::
-  # * *path* (String): API path to contact (from v1/ and without .json)
-  # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
-  # Result::
-  # * Faraday::Response: The HTTP response
-  def http(path, verb: :get)
-    @http_client.send(verb) do |req|
-      req.url api_uri(path)
-      req.headers['apikey'] = @api_key
-      req.headers['User-Agent'] = "nexus_mods (#{RUBY_PLATFORM}) Ruby/#{RUBY_VERSION}"
-    end
-  end
-
-  # Get the real URI to query for a given API path
-  #
-  # Parameters::
-  # * *path* (String): API path to contact (from v1/ and without .json)
-  # Result::
-  # * String: The URI
-  def api_uri(path)
-    "https://api.nexusmods.com/v1/#{path}.json"
   end
 
 end
