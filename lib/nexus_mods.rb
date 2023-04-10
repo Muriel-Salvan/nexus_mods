@@ -98,10 +98,12 @@ class NexusMods
 
   # Get the list of games
   #
+  # Parameters::
+  # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
   # Result::
   # * Array<Game>: List of games
-  def games
-    @api_client.api('games').map do |game_json|
+  def games(clear_cache: false)
+    @api_client.api('games', clear_cache:).map do |game_json|
       # First create categories tree
       # Hash<Integer, [Category, Integer]>: Category and its parent category id, per category id
       categories = game_json['categories'].to_h do |category_json|
@@ -145,10 +147,11 @@ class NexusMods
   # Parameters::
   # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
   # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
   # Result::
   # * Mod: Mod information
-  def mod(game_domain_name: @game_domain_name, mod_id: @mod_id)
-    mod_json = @api_client.api "games/#{game_domain_name}/mods/#{mod_id}"
+  def mod(game_domain_name: @game_domain_name, mod_id: @mod_id, clear_cache: false)
+    mod_json = @api_client.api("games/#{game_domain_name}/mods/#{mod_id}", clear_cache:)
     Api::Mod.new(
       uid: mod_json['uid'],
       mod_id: mod_json['mod_id'],
@@ -193,10 +196,11 @@ class NexusMods
   # Parameters::
   # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
   # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
   # Result::
   # * Array<ModFile>: List of mod's files
-  def mod_files(game_domain_name: @game_domain_name, mod_id: @mod_id)
-    @api_client.api("games/#{game_domain_name}/mods/#{mod_id}/files")['files'].map do |file_json|
+  def mod_files(game_domain_name: @game_domain_name, mod_id: @mod_id, clear_cache: false)
+    @api_client.api("games/#{game_domain_name}/mods/#{mod_id}/files", clear_cache:)['files'].map do |file_json|
       category_id = FILE_CATEGORIES[file_json['category_id']]
       raise "Unknown file category: #{file_json['category_id']}" if category_id.nil?
 
@@ -220,5 +224,10 @@ class NexusMods
       )
     end
   end
+
+  # TODO: Check http cache usefulness and either test it or remove it
+  # TODO: Check if attr_reader of mod_id and game_id is needed and remove it if not
+  # TODO: Find better cache keys
+  # TODO: Documentation and examples
 
 end
