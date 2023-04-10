@@ -1,3 +1,9 @@
+# [v1.1.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v1.0.0...v1.1.0) (2023-04-10 19:19:16)
+
+### Features
+
+* [[Feature] Add log_level parameter while creating nexus_mods instance](https://github.com/Muriel-Salvan/nexus_mods/commit/1b6215be2d9b3a97076bb6b7bf665f8ec8e900ca)
+
 # [v1.0.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.6.0...v1.0.0) (2023-04-10 19:03:51)
 
 ### Breaking changes
