@@ -55,6 +55,9 @@ module NexusModsTest
     def nexus_mods(**args)
       if @nexus_mods.nil?
         args[:api_key] = MOCKED_API_KEY unless args.key?(:api_key)
+        # By default running tests should not persistent cache files
+        args[:http_cache_file] = nil unless args.key?(:http_cache_file)
+        args[:api_cache_file] = nil unless args.key?(:api_cache_file)
         # Redirect any log into a string so that they don't pollute the tests output and they could be asserted.
         nexus_mods_logger = StringIO.new
         args[:logger] = Logger.new(nexus_mods_logger)
@@ -132,6 +135,19 @@ module NexusModsTest
         },
         times:
       )
+    end
+
+    # Setup an API cache file to be used (does not create it)
+    #
+    # Parameters::
+    # * CodeBlock: The code called when the API cache file is reserved
+    #   * Parameters::
+    #     * *api_cache_file* (String): File name to be used for the API cache file
+    def with_api_cache_file
+      api_cache_file = "#{Dir.tmpdir}/nexus_mods_test/api_cache.json"
+      FileUtils.mkdir_p(File.dirname(api_cache_file))
+      FileUtils.rm_f(api_cache_file)
+      yield api_cache_file
     end
 
   end

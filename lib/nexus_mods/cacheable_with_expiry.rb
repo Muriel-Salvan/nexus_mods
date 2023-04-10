@@ -34,19 +34,21 @@ class NexusMods
           *original_method_names,
           **opts.merge(
             {
-              cache_options: {
-                expiry_from_key: opts[:expiry_from_key],
-                invalidate_if: proc do |key, options, context|
-                  next true unless context['invalidate_time']
+              cache_options: (opts[:cache_options] || {}).merge(
+                {
+                  expiry_from_key: opts[:expiry_from_key],
+                  invalidate_if: proc do |key, options, context|
+                    next true unless context['invalidate_time']
 
-                  # Find if we know already the expiry for this key
-                  expiry_cache[key] = options[:expiry_from_key].call(key) unless expiry_cache.key?(key)
-                  expiry_cache[key].nil? || (Time.now.utc - Time.parse(context['invalidate_time']).utc > expiry_cache[key])
-                end,
-                update_context_after_fetch: proc do |_key, _value, _options, context|
-                  context['invalidate_time'] = Time.now.utc.strftime('%FT%TUTC')
-                end
-              }
+                    # Find if we know already the expiry for this key
+                    expiry_cache[key] = options[:expiry_from_key].call(key) unless expiry_cache.key?(key)
+                    expiry_cache[key].nil? || (Time.now.utc - Time.parse(context['invalidate_time']).utc > expiry_cache[key])
+                  end,
+                  update_context_after_fetch: proc do |_key, _value, _options, context|
+                    context['invalidate_time'] = Time.now.utc.strftime('%FT%TUTC')
+                  end
+                }
+              )
             }
           )
         )

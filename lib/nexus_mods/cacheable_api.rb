@@ -28,7 +28,8 @@ class NexusMods
       #     * *key* (String): The key for which we want the expiry time in seconds
       #   * Result::
       #     * Integer: Corresponding expiry time
-      def cacheable_api(*original_method_names, expiry_from_key:)
+      # * *on_cache_update* (Proc): Proc called when the cache has been updated
+      def cacheable_api(*original_method_names, expiry_from_key:, on_cache_update:)
         cacheable_with_expiry(
           *original_method_names,
           key_format: lambda do |target, method_name, method_args, method_kwargs|
@@ -41,7 +42,12 @@ class NexusMods
                 method_kwargs.map { |key, value| "#{key}:#{value}" }
             ).join('/')
           end,
-          expiry_from_key:
+          expiry_from_key:,
+          cache_options: {
+            on_cache_update: proc do |_adapter, _key, _value, _options, _context|
+              on_cache_update.call
+            end
+          }
         )
       end
 
