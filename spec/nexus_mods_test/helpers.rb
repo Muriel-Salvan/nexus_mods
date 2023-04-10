@@ -145,12 +145,19 @@ RSpec.configure do |config|
   config.include NexusModsTest::Factories::ModFiles
   config.before do
     @nexus_mods = nil
+    # Reload the ApiClient as it stores caches at class level
+    NexusMods::ApiClient.clear_cacheable_expiry_caches
     # Keep a list of the etags we should have returned, so that we know when queries should contain them
     # Array<String>
     @expected_returned_etags = []
     # List of expected stubs and the number of times they were supposed to mock
     # Array< [ WebMock::RequestStub, Integer ] >
     @expected_stubs = []
+  end
+  config.after do
+    @expected_stubs.each do |(stub, times)|
+      expect(stub).to have_been_made.times(times)
+    end
   end
 end
 
