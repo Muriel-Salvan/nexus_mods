@@ -1,3 +1,9 @@
+# [v0.5.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.4.0...v0.5.0) (2023-04-10 17:05:11)
+
+### Features
+
+* [[Feature] Add clear_cache parameters to invalidate the API cache at will](https://github.com/Muriel-Salvan/nexus_mods/commit/44958e35eae20ef818e3d4735cc3bd3008cfc5df)
+
 # [v0.4.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v0.3.0...v0.4.0) (2023-04-10 10:15:41)
 
 ### Features
