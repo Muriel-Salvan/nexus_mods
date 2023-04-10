@@ -29,10 +29,19 @@ class NexusMods
       #   * Result::
       #     * Integer: Corresponding expiry time
       # * *on_cache_update* (Proc): Proc called when the cache has been updated
-      def cacheable_api(*original_method_names, expiry_from_key:, on_cache_update:)
+      # * *key_format* (Proc or nil): Optional proc giving the key format from the target of cacheable [default: nil].
+      #   If nil then a default proc concatenating the target's class, method name and all arguments will be used.
+      #   * Parameters::
+      #     * *target* (Object): Object on which the method is cached
+      #     * *method_name* (Symbol): Method being cached
+      #     * *method_args* (Array<Object>): Method's arguments
+      #     * *method_kwargs* (Hash<Symbol,Object>): Method's kwargs
+      #   * Result::
+      #     * String: The corresponding key to be used for caching
+      def cacheable_api(*original_method_names, expiry_from_key:, on_cache_update:, key_format: nil)
         cacheable_with_expiry(
           *original_method_names,
-          key_format: lambda do |target, method_name, method_args, method_kwargs|
+          key_format: key_format || proc do |target, method_name, method_args, method_kwargs|
             (
               [
                 target.class,
