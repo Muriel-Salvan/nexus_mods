@@ -23,6 +23,20 @@ describe NexusMods do
       expect(nexus_mods.games).to eq(games)
     end
 
+    it 'does not cache games queries if asked' do
+      expect_validate_user
+      expect_http_call_to(
+        path: '/v1/games.json',
+        json: [
+          json_game100,
+          json_game101
+        ],
+        times: 2
+      )
+      games = nexus_mods.games
+      expect(nexus_mods.games(clear_cache: true)).to eq(games)
+    end
+
     it 'caches mod queries' do
       expect_validate_user
       expect_http_call_to(
@@ -33,6 +47,17 @@ describe NexusMods do
       expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq(mod)
     end
 
+    it 'does not cache mod queries if asked' do
+      expect_validate_user
+      expect_http_call_to(
+        path: '/v1/games/skyrimspecialedition/mods/2014.json',
+        json: json_complete_mod,
+        times: 2
+      )
+      mod = nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
+      expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq(mod)
+    end
+
     it 'caches mod files queries' do
       expect_validate_user
       expect_http_call_to(
@@ -41,6 +66,17 @@ describe NexusMods do
       )
       mod_files = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
       expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq(mod_files)
+    end
+
+    it 'does not cache mod files queries if asked' do
+      expect_validate_user
+      expect_http_call_to(
+        path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
+        json: { files: [json_mod_file2472, json_mod_file2487] },
+        times: 2
+      )
+      mod_files = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
+      expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq(mod_files)
     end
 
     it 'expires games queries cache' do
@@ -85,6 +121,25 @@ describe NexusMods do
       expect(nexus_mods_instance.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq(mod_files)
     end
 
+    it 'only clears the cache of the wanted resource' do
+      expect_validate_user
+      expect_http_call_to(
+        path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
+        json: { files: [json_mod_file2472] },
+        times: 2
+      )
+      expect_http_call_to(
+        path: '/v1/games/skyrimspecialedition/mods/2015/files.json',
+        json: { files: [json_mod_file2487] }
+      )
+      mod_files20141 = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
+      mod_files20151 = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
+      mod_files20142 = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)
+      mod_files20152 = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
+      expect(mod_files20141).to eq(mod_files20142)
+      expect(mod_files20151).to eq(mod_files20152)
+    end
+
     context 'with file persistence' do
 
       it 'persists API cache in a file' do
@@ -116,8 +171,51 @@ describe NexusMods do
           # Generate the cache first
           games = nexus_mods(api_cache_file:).games
           # Force a new instance of NexusMods API to run
-          @nexus_mods = nil
+          reset_nexus_mods
           expect(nexus_mods(api_cache_file:).games).to eq games
+        end
+      end
+
+      it 'uses API cache from a file, taking expiry time into account' do
+        with_api_cache_file do |api_cache_file|
+          expect_validate_user(times: 2)
+          expect_http_call_to(
+            path: '/v1/games.json',
+            json: [
+              json_game100,
+              json_game101
+            ],
+            times: 2
+          )
+          # Generate the cache first
+          games = nexus_mods(api_cache_file:, api_cache_expiry: { games: 1 }).games
+          # Force a new instance of NexusMods API to run
+          reset_nexus_mods
+          sleep 2
+          # As the expiry time is 1 second, then the cache should still be invalidated
+          expect(nexus_mods(api_cache_file:, api_cache_expiry: { games: 1 }).games).to eq games
+        end
+      end
+
+      it 'uses API cache from a file, taking expiry time of the new process into account' do
+        with_api_cache_file do |api_cache_file|
+          expect_validate_user(times: 2)
+          expect_http_call_to(
+            path: '/v1/games.json',
+            json: [
+              json_game100,
+              json_game101
+            ],
+            times: 2
+          )
+          # Generate the cache first
+          games = nexus_mods(api_cache_file:, api_cache_expiry: { games: 10 }).games
+          # Force a new instance of NexusMods API to run
+          reset_nexus_mods
+          sleep 2
+          # Even if the expiry time was 10 seconds while fetching the resource,
+          # if we decide it has to be 1 second now then it has to be invalidated.
+          expect(nexus_mods(api_cache_file:, api_cache_expiry: { games: 1 }).games).to eq games
         end
       end
 
@@ -134,7 +232,7 @@ describe NexusMods do
           )
           games = nexus_mods(api_cache_file:).games
           # Force a new instance of NexusMods API to run
-          @nexus_mods = nil
+          reset_nexus_mods
           # Complete the cache with a mod
           expect_http_call_to(
             path: '/v1/games/skyrimspecialedition/mods/2014.json',
@@ -142,11 +240,46 @@ describe NexusMods do
           )
           mod = nexus_mods(api_cache_file:).mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
           # Force a new instance of NexusMods API to run
-          @nexus_mods = nil
+          reset_nexus_mods
           # Check that both API calls were cached correctly
           nexus_mods_instance = nexus_mods(api_cache_file:)
           expect(nexus_mods_instance.games).to eq games
           expect(nexus_mods_instance.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod
+        end
+      end
+
+      it 'clears the cache of a wanted resource in the API cache file as well' do
+        with_api_cache_file do |api_cache_file|
+          expect_validate_user(times: 3)
+          # Generate the cache first for 2 mod files queries
+          expect_http_call_to(
+            path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
+            json: { files: [json_mod_file2472] },
+            times: 2
+          )
+          expect_http_call_to(
+            path: '/v1/games/skyrimspecialedition/mods/2015/files.json',
+            json: { files: [json_mod_file2487] }
+          )
+          nexus_mods_instance1 = nexus_mods(api_cache_file:)
+          mod_files20141 = nexus_mods_instance1.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
+          mod_files20151 = nexus_mods_instance1.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
+          # Force a new instance of NexusMods API to run
+          reset_nexus_mods
+          # Clear the cache of the first API query
+          nexus_mods_instance2 = nexus_mods(api_cache_file:)
+          mod_files20142 = nexus_mods_instance2.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)
+          mod_files20152 = nexus_mods_instance2.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
+          # Force a new instance of NexusMods API to run
+          reset_nexus_mods
+          # Get again the data, it should have been in the cache already
+          nexus_mods_instance3 = nexus_mods(api_cache_file:)
+          mod_files20143 = nexus_mods_instance3.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
+          mod_files20153 = nexus_mods_instance3.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
+          expect(mod_files20141).to eq(mod_files20142)
+          expect(mod_files20141).to eq(mod_files20143)
+          expect(mod_files20151).to eq(mod_files20152)
+          expect(mod_files20151).to eq(mod_files20153)
         end
       end
 

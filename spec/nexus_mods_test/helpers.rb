@@ -59,11 +59,22 @@ module NexusModsTest
         args[:http_cache_file] = nil unless args.key?(:http_cache_file)
         args[:api_cache_file] = nil unless args.key?(:api_cache_file)
         # Redirect any log into a string so that they don't pollute the tests output and they could be asserted.
-        nexus_mods_logger = StringIO.new
-        args[:logger] = Logger.new(nexus_mods_logger)
+        @nexus_mods_logger = StringIO.new
+        args[:logger] = Logger.new(@nexus_mods_logger)
         @nexus_mods = NexusMods.new(**args)
       end
       @nexus_mods
+    end
+
+    # Reset the NexusMods instance.
+    # Dump the output if needed for debugging purposes.
+    def reset_nexus_mods
+      if @nexus_mods && test_debug?
+        puts "===== NexusMods output BEGIN ====="
+        puts @nexus_mods_logger.string
+        puts "===== NexusMods output END ====="
+      end
+      @nexus_mods = nil
     end
 
     # Expect an HTTP API call to be made, and mock the corresponding HTTP response.
@@ -150,6 +161,14 @@ module NexusModsTest
       yield api_cache_file
     end
 
+    # Are we in test debug mode?
+    #
+    # Result::
+    # * Boolean: Are we in test debug mode?
+    def test_debug?
+      ENV['TEST_DEBUG'] == '1'
+    end
+
   end
 
 end
@@ -173,6 +192,13 @@ RSpec.configure do |config|
   config.after do
     @expected_stubs.each do |(stub, times)|
       expect(stub).to have_been_made.times(times)
+    end
+  end
+  config.around do |example|
+    begin
+      example.call
+    ensure
+      reset_nexus_mods
     end
   end
 end

@@ -63,74 +63,13 @@ class NexusMods
     # Parameters::
     # * *path* (String): API path to contact (from v1/ and without .json)
     # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
+    # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
     # Result::
     # * Object: The JSON response
-    def api(path, verb: :get)
-      res = http(path, verb:)
-      json = JSON.parse(res.body)
-      uri = api_uri(path)
-      @logger.debug "[API call] - #{verb} #{uri} => #{res.status}\n#{
-          JSON.
-            pretty_generate(json).
-            split("\n").
-            map { |line| "  #{line}" }.
-            join("\n")
-        }\n#{
-          res.
-            headers.
-            map { |header, value| "  #{header}: #{value}" }.
-            join("\n")
-        }"
-      case res.status
-      when 200
-        # Happy
-      when 429
-        # Some limits of the API have been reached
-        raise LimitsExceededError, "Exceeding limits of API calls: #{res.headers.select { |header, _value| header =~ /^x-rl-.+$/ }}"
-      else
-        raise ApiError, "API #{uri} returned error code #{res.status}" unless res.status == '200'
-      end
-      json
+    def api(path, verb: :get, clear_cache: false)
+      clear_cached_api_cache(path, verb:) if clear_cache
+      cached_api(path, verb:)
     end
-    cacheable_api(
-      :api,
-      expiry_from_key: proc do |key|
-        # Example of keys:
-        # NexusMods::ApiClient/api/games
-        # NexusMods::ApiClient/api/games/skyrimspecialedition/mods/2014
-        # NexusMods::ApiClient/api/games/skyrimspecialedition/mods/2014/files
-        # NexusMods::ApiClient/api/users/validate
-        key_components = key.split('/')[2..]
-        case key_components[0]
-        when 'games'
-          if key_components[1].nil?
-            ApiClient.api_client.api_cache_expiry[:games]
-          else
-            case key_components[2]
-            when 'mods'
-              case key_components[4]
-              when nil
-                ApiClient.api_client.api_cache_expiry[:mod]
-              when 'files'
-                ApiClient.api_client.api_cache_expiry[:mod_files]
-              else
-                raise "Unknown API path: #{key}"
-              end
-            else
-              raise "Unknown API path: #{key}"
-            end
-          end
-        when 'users'
-          # Don't cache this path as it is used to know API limits
-          0
-        else
-          raise "Unknown API path: #{key}"
-        end
-      end,
-      on_cache_update: proc do
-        ApiClient.api_client.save_api_cache
-      end
-    )
 
     # Send an HTTP request to the API and get back the HTTP response
     #
@@ -173,6 +112,81 @@ class NexusMods
     end
 
     @api_client = nil
+
+    # Send an HTTP request to the API and get back the answer as a JSON.
+    # Use caching.
+    #
+    # Parameters::
+    # * *path* (String): API path to contact (from v1/ and without .json)
+    # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
+    # Result::
+    # * Object: The JSON response
+    def cached_api(path, verb: :get)
+      res = http(path, verb:)
+      json = JSON.parse(res.body)
+      uri = api_uri(path)
+      @logger.debug "[API call] - #{verb} #{uri} => #{res.status}\n#{
+          JSON.
+            pretty_generate(json).
+            split("\n").
+            map { |line| "  #{line}" }.
+            join("\n")
+        }\n#{
+          res.
+            headers.
+            map { |header, value| "  #{header}: #{value}" }.
+            join("\n")
+        }"
+      case res.status
+      when 200
+        # Happy
+      when 429
+        # Some limits of the API have been reached
+        raise LimitsExceededError, "Exceeding limits of API calls: #{res.headers.select { |header, _value| header =~ /^x-rl-.+$/ }}"
+      else
+        raise ApiError, "API #{uri} returned error code #{res.status}" unless res.status == '200'
+      end
+      json
+    end
+    cacheable_api(
+      :cached_api,
+      expiry_from_key: proc do |key|
+        # Example of keys:
+        # NexusMods::ApiClient/cached_api/games/verb:get
+        # NexusMods::ApiClient/cached_api/games/skyrimspecialedition/mods/2014/verb:get
+        # NexusMods::ApiClient/cached_api/games/skyrimspecialedition/mods/2014/files/verb:get
+        # NexusMods::ApiClient/cached_api/users/validate/verb:get
+        key_components = key.split('/')[2..-2]
+        case key_components[0]
+        when 'games'
+          if key_components[1].nil?
+            ApiClient.api_client.api_cache_expiry[:games]
+          else
+            case key_components[2]
+            when 'mods'
+              case key_components[4]
+              when nil
+                ApiClient.api_client.api_cache_expiry[:mod]
+              when 'files'
+                ApiClient.api_client.api_cache_expiry[:mod_files]
+              else
+                raise "Unknown API path: #{key}"
+              end
+            else
+              raise "Unknown API path: #{key}"
+            end
+          end
+        when 'users'
+          # Don't cache this path as it is used to know API limits
+          0
+        else
+          raise "Unknown API path: #{key}"
+        end
+      end,
+      on_cache_update: proc do
+        ApiClient.api_client.save_api_cache
+      end
+    )
 
     # Get the real URI to query for a given API path
     #
