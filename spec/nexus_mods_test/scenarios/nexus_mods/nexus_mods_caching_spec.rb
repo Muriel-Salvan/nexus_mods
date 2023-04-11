@@ -20,7 +20,7 @@ describe NexusMods do
         ]
       )
       games = nexus_mods.games
-      expect(nexus_mods.games).to eq(games)
+      expect(nexus_mods.games).to eq games
     end
 
     it 'does not cache games queries if asked' do
@@ -34,7 +34,7 @@ describe NexusMods do
         times: 2
       )
       games = nexus_mods.games
-      expect(nexus_mods.games(clear_cache: true)).to eq(games)
+      expect(nexus_mods.games(clear_cache: true)).to eq games
     end
 
     it 'caches mod queries' do
@@ -44,7 +44,7 @@ describe NexusMods do
         json: json_complete_mod
       )
       mod = nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq(mod)
+      expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod
     end
 
     it 'does not cache mod queries if asked' do
@@ -55,7 +55,7 @@ describe NexusMods do
         times: 2
       )
       mod = nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq(mod)
+      expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq mod
     end
 
     it 'caches mod files queries' do
@@ -65,7 +65,7 @@ describe NexusMods do
         json: { files: [json_mod_file2472, json_mod_file2487] }
       )
       mod_files = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq(mod_files)
+      expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod_files
     end
 
     it 'does not cache mod files queries if asked' do
@@ -76,7 +76,55 @@ describe NexusMods do
         times: 2
       )
       mod_files = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq(mod_files)
+      expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq mod_files
+    end
+
+    {
+      'last day' => {
+        since: :one_day,
+        expected_url_params: 'period=1d'
+      },
+      'last week' => {
+        since: :one_week,
+        expected_url_params: 'period=1w'
+      },
+      'last month' => {
+        since: :one_month,
+        expected_url_params: 'period=1m'
+      }
+    }.each do |since, since_config|
+
+      context "when testing updated months since #{since}" do
+
+        it 'caches mod updates queries' do
+          expect_validate_user
+          expect_http_call_to(
+            path: "/v1/games/skyrimspecialedition/mods/updated.json?#{since_config[:expected_url_params]}",
+            json: [
+              json_mod_updates2014,
+              json_mod_updates100
+            ]
+          )
+          mod_updates = nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since])
+          expect(nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since])).to eq mod_updates
+        end
+
+        it 'does not cache mod updates queries if asked' do
+          expect_validate_user
+          expect_http_call_to(
+            path: "/v1/games/skyrimspecialedition/mods/updated.json?#{since_config[:expected_url_params]}",
+            json: [
+              json_mod_updates2014,
+              json_mod_updates100
+            ],
+            times: 2
+          )
+          mod_updates = nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since])
+          expect(nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since], clear_cache: true)).to eq mod_updates
+        end
+
+      end
+
     end
 
     it 'expires games queries cache' do
@@ -92,7 +140,7 @@ describe NexusMods do
       nexus_mods_instance = nexus_mods(api_cache_expiry: { games: 1 })
       games = nexus_mods_instance.games
       sleep 2
-      expect(nexus_mods_instance.games).to eq(games)
+      expect(nexus_mods_instance.games).to eq games
     end
 
     it 'expires mod queries cache' do
@@ -105,7 +153,7 @@ describe NexusMods do
       nexus_mods_instance = nexus_mods(api_cache_expiry: { mod: 1 })
       mod = nexus_mods_instance.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
       sleep 2
-      expect(nexus_mods_instance.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq(mod)
+      expect(nexus_mods_instance.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod
     end
 
     it 'expires mod files queries cache' do
@@ -118,7 +166,7 @@ describe NexusMods do
       nexus_mods_instance = nexus_mods(api_cache_expiry: { mod_files: 1 })
       mod_files = nexus_mods_instance.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
       sleep 2
-      expect(nexus_mods_instance.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq(mod_files)
+      expect(nexus_mods_instance.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod_files
     end
 
     it 'only clears the cache of the wanted resource' do
@@ -136,8 +184,8 @@ describe NexusMods do
       mod_files20151 = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
       mod_files20142 = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)
       mod_files20152 = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
-      expect(mod_files20141).to eq(mod_files20142)
-      expect(mod_files20151).to eq(mod_files20152)
+      expect(mod_files20141).to eq mod_files20142
+      expect(mod_files20151).to eq mod_files20152
     end
 
     context 'with file persistence' do
@@ -276,10 +324,10 @@ describe NexusMods do
           nexus_mods_instance3 = nexus_mods(api_cache_file:)
           mod_files20143 = nexus_mods_instance3.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
           mod_files20153 = nexus_mods_instance3.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2015)
-          expect(mod_files20141).to eq(mod_files20142)
-          expect(mod_files20141).to eq(mod_files20143)
-          expect(mod_files20151).to eq(mod_files20152)
-          expect(mod_files20151).to eq(mod_files20153)
+          expect(mod_files20141).to eq mod_files20142
+          expect(mod_files20141).to eq mod_files20143
+          expect(mod_files20151).to eq mod_files20152
+          expect(mod_files20151).to eq mod_files20153
         end
       end
 

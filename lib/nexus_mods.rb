@@ -8,6 +8,7 @@ require 'nexus_mods/api/game'
 require 'nexus_mods/api/user'
 require 'nexus_mods/api/mod'
 require 'nexus_mods/api/mod_file'
+require 'nexus_mods/api/mod_updates'
 
 # Ruby API to access NexusMods REST API
 class NexusMods
@@ -130,7 +131,7 @@ class NexusMods
         nexusmods_url: game_json['nexusmods_url'],
         genre: game_json['genre'],
         domain_name: game_json['domain_name'],
-        approved_date: Time.at(game_json['approved_date']),
+        approved_date: Time.at(game_json['approved_date']).utc,
         files_count: game_json['file_count'],
         files_views: game_json['file_views'],
         files_endorsements: game_json['file_endorsements'],
@@ -209,6 +210,35 @@ class NexusMods
         description: file_json['description'],
         changelog_html: file_json['changelog_html'],
         content_preview_url: file_json['content_preview_link']
+      )
+    end
+  end
+
+  # Get a list of updated mod ids since a given time
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *since* (Symbol): The time from which we look for updated mods [default: :one_day]
+  #   Possible values are:
+  #   * *one_day*: Since 1 day
+  #   * *one_week*: Since 1 week
+  #   * *one_month*: Since 1 month
+  # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
+  # Result::
+  # * Array<ModUpdates>: Mod's updates information
+  def updated_mods(game_domain_name: @game_domain_name, since: :one_day, clear_cache: false)
+    nexus_mods_period = {
+      one_day: '1d',
+      one_week: '1w',
+      one_month: '1m'
+    }[since]
+    raise "Unknown time stamp: #{since}" if nexus_mods_period.nil?
+
+    @api_client.api("games/#{game_domain_name}/mods/updated", parameters: { period: nexus_mods_period }, clear_cache:).map do |updated_mod_json|
+      Api::ModUpdates.new(
+        mod_id: updated_mod_json['mod_id'],
+        latest_file_update: Time.at(updated_mod_json['latest_file_update']).utc,
+        latest_mod_activity: Time.at(updated_mod_json['latest_mod_activity']).utc
       )
     end
   end
