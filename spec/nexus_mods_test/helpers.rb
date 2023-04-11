@@ -4,6 +4,7 @@ require 'rspec/support/object_formatter'
 require 'nexus_mods_test/factories/games'
 require 'nexus_mods_test/factories/mods'
 require 'nexus_mods_test/factories/mod_files'
+require 'nexus_mods_test/factories/mod_updates'
 require 'nexus_mods'
 
 module NexusModsTest
@@ -180,6 +181,7 @@ RSpec.configure do |config|
   config.include NexusModsTest::Factories::Games
   config.include NexusModsTest::Factories::Mods
   config.include NexusModsTest::Factories::ModFiles
+  config.include NexusModsTest::Factories::ModUpdates
   config.before do
     @nexus_mods = nil
     # Reload the ApiClient as it stores caches at class level

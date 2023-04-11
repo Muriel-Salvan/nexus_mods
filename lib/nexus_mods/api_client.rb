@@ -50,25 +50,27 @@ class NexusMods
     #
     # Parameters::
     # * *path* (String): API path to contact (from v1/ and without .json)
+    # * *parameters* (Hash<Symbol,Object>): Optional parameters to add to the path [default: {}]
     # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
     # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
     # Result::
     # * Object: The JSON response
-    def api(path, verb: :get, clear_cache: false)
-      clear_cached_api_cache(path, verb:) if clear_cache
-      cached_api(path, verb:)
+    def api(path, parameters: {}, verb: :get, clear_cache: false)
+      clear_cached_api_cache(path, parameters:, verb:) if clear_cache
+      cached_api(path, parameters:, verb:)
     end
 
     # Send an HTTP request to the API and get back the HTTP response
     #
     # Parameters::
     # * *path* (String): API path to contact (from v1/ and without .json)
+    # * *parameters* (Hash<Symbol,Object>): Optional parameters to add to the path [default: {}]
     # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
     # Result::
     # * Faraday::Response: The HTTP response
-    def http(path, verb: :get)
+    def http(path, parameters: {}, verb: :get)
       @http_client.send(verb) do |req|
-        req.url api_uri(path)
+        req.url api_uri(path, parameters:)
         req.headers['apikey'] = @api_key
         req.headers['User-Agent'] = "nexus_mods/#{NexusMods::VERSION} (#{RUBY_PLATFORM}) Ruby/#{RUBY_VERSION}"
       end
@@ -106,11 +108,12 @@ class NexusMods
     #
     # Parameters::
     # * *path* (String): API path to contact (from v1/ and without .json)
+    # * *parameters* (Hash<Symbol,Object>): Optional parameters to add to the path [default: {}]
     # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
     # Result::
     # * Object: The JSON response
-    def cached_api(path, verb: :get)
-      res = http(path, verb:)
+    def cached_api(path, parameters: {}, verb: :get)
+      res = http(path, parameters:, verb:)
       json = JSON.parse(res.body)
       uri = api_uri(path)
       @logger.debug "[API call] - #{verb} #{uri} => #{res.status}\n#{
@@ -139,11 +142,14 @@ class NexusMods
     cacheable_api(
       :cached_api,
       key_format: proc do |_target, _method_name, method_args, method_kwargs|
-        "#{method_kwargs[:verb]}/#{method_args.first}"
+        "#{method_kwargs[:verb]}/#{method_args.first}#{
+          method_kwargs[:parameters].empty? ? '' : "/#{method_kwargs[:parameters].map { |param, value| "#{param}=#{value}" }.sort.join('/')}"
+        }"
       end,
       expiry_from_key: proc do |key|
         # Example of keys:
         # get/games
+        # get/games/skyrimspecialedition/mods/updated/period=1d
         # get/games/skyrimspecialedition/mods/2014
         # get/games/skyrimspecialedition/mods/2014/files
         # get/users/validate
@@ -155,13 +161,19 @@ class NexusMods
           else
             case key_components[2]
             when 'mods'
-              case key_components[4]
-              when nil
-                ApiClient.api_client.api_cache_expiry[:mod]
-              when 'files'
-                ApiClient.api_client.api_cache_expiry[:mod_files]
+              case key_components[3]
+              when 'updated'
+                # According to the API doc, this is updated every 5 minutes
+                5 * 60
               else
-                raise "Unknown API path: #{key}"
+                case key_components[4]
+                when nil
+                  ApiClient.api_client.api_cache_expiry[:mod]
+                when 'files'
+                  ApiClient.api_client.api_cache_expiry[:mod_files]
+                else
+                  raise "Unknown API path: #{key}"
+                end
               end
             else
               raise "Unknown API path: #{key}"
@@ -183,10 +195,11 @@ class NexusMods
     #
     # Parameters::
     # * *path* (String): API path to contact (from v1/ and without .json)
+    # * *parameters* (Hash<Symbol,Object>): Optional parameters to add to the path [default: {}]
     # Result::
     # * String: The URI
-    def api_uri(path)
-      "https://api.nexusmods.com/v1/#{path}.json"
+    def api_uri(path, parameters: {})
+      "https://api.nexusmods.com/v1/#{path}.json#{parameters.empty? ? '' : "?#{parameters.map { |param, value| "#{param}=#{value}" }.join('&')}"}"
     end
 
   end

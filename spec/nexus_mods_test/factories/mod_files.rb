@@ -63,7 +63,7 @@ module NexusModsTest
       # Expect a mod's file to be the example one with id 2472
       #
       # Parameters::
-      # * *mod_file* (NexusMods::Api::File): Mod file to validate
+      # * *mod_file* (NexusMods::Api::ModFile): Mod file to validate
       def expect_mod_file_to_be2472(mod_file)
         expect(mod_file.ids).to eq [2472, 1704]
         expect(mod_file.uid).to eq 7_318_624_274_856
@@ -87,7 +87,7 @@ module NexusModsTest
       # Expect a mod's file to be the example one with id 2487
       #
       # Parameters::
-      # * *mod_file* (NexusMods::Api::File): Mod file to validate
+      # * *mod_file* (NexusMods::Api::ModFile): Mod file to validate
       def expect_mod_file_to_be2487(mod_file)
         expect(mod_file.ids).to eq [2487, 1705]
         expect(mod_file.uid).to eq 7_318_624_274_857
