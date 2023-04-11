@@ -1,3 +1,9 @@
+# [v2.0.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.0.0...v2.0.1) (2023-04-11 10:22:54)
+
+### Patches
+
+* [Added NexusMods version in the user agent](https://github.com/Muriel-Salvan/nexus_mods/commit/41092e06db91d1dc3e3badb66aeccf85d62a2d00)
+
 # [v2.0.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v1.1.1...v2.0.0) (2023-04-11 10:15:58)
 
 ### Breaking changes
