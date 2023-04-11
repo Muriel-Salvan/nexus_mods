@@ -1,7 +1,5 @@
 require 'fileutils'
 require 'faraday'
-require 'faraday-http-cache'
-require 'nexus_mods/file_cache'
 require 'nexus_mods/cacheable_api'
 
 class NexusMods
@@ -23,7 +21,6 @@ class NexusMods
     #
     # Parameters::
     # * *api_key* (String or nil): The API key to be used, or nil for another authentication [default: nil]
-    # * *http_cache_file* (String): File used to store the HTTP cache, or nil for no cache [default: "#{Dir.tmpdir}/nexus_mods_http_cache.json"]
     # * *api_cache_expiry* (Hash<Symbol,Integer>): Expiry times in seconds, per expiry key. Possible keys are:
     #   * *games*: Expiry associated to queries on games [default: 1 day]
     #   * *mod*: Expiry associated to queries on mod [default: 1 day]
@@ -32,7 +29,6 @@ class NexusMods
     # * *logger* (Logger): The logger to be used for log messages [default: Logger.new(STDOUT)]
     def initialize(
       api_key: nil,
-      http_cache_file: "#{Dir.tmpdir}/nexus_mods_http_cache.json",
       api_cache_expiry: DEFAULT_API_CACHE_EXPIRY,
       api_cache_file: "#{Dir.tmpdir}/nexus_mods_api_cache.json",
       logger: Logger.new($stdout)
@@ -43,16 +39,7 @@ class NexusMods
       ApiClient.api_client = self
       @logger = logger
       # Initialize our HTTP client
-      @http_cache = http_cache_file.nil? ? nil : FileCache.new(http_cache_file)
-      @http_client = Faraday.new do |builder|
-        # Indicate that the cache is not shared, meaning that private resources (depending on the session) can be cached as we consider only 1 user is using it for a given file cache.
-        # Use Marshal serializer as some URLs can't get decoded correctly due to UTF-8 issues
-        builder.use :http_cache,
-                    store: @http_cache,
-                    shared_cache: false,
-                    serializer: Marshal
-        builder.adapter Faraday.default_adapter
-      end
+      @http_client = Faraday.new
       Cacheable.cache_adapter = :persistent_json
       load_api_cache
     end
