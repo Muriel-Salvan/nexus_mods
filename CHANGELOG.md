@@ -1,3 +1,9 @@
+# [v2.1.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.0.1...v2.1.0) (2023-04-11 18:24:04)
+
+### Features
+
+* [[Feature] Add API entry point to retrieve last updated mods](https://github.com/Muriel-Salvan/nexus_mods/commit/cf702fc2c146cc7d61aadca005aa0e784b807c44)
+
 # [v2.0.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.0.0...v2.0.1) (2023-04-11 10:22:54)
 
 ### Patches
