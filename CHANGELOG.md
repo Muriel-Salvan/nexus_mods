@@ -1,3 +1,9 @@
+# [v2.0.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v1.1.1...v2.0.0) (2023-04-11 10:15:58)
+
+### Breaking changes
+
+* [[Breaking] Remove http cache file and useless support for etags as the API does not cache at http level](https://github.com/Muriel-Salvan/nexus_mods/commit/e157524e17ef0ed1a7013f14b15eaa35bb309592)
+
 # [v1.1.1](https://github.com/Muriel-Salvan/nexus_mods/compare/v1.1.0...v1.1.1) (2023-04-10 19:39:28)
 
 ### Patches
