@@ -39,7 +39,6 @@ class NexusMods
   # * *game_domain_name* (String): Game domain name to query by default [default: 'skyrimspecialedition']
   # * *mod_id* (Integer): Mod to query by default [default: 1]
   # * *file_id* (Integer): File to query by default [default: 1]
-  # * *http_cache_file* (String): File used to store the HTTP cache, or nil for no cache [default: "#{Dir.tmpdir}/nexus_mods_http_cache.json"]
   # * *api_cache_expiry* (Hash<Symbol,Integer>): Expiry times in seconds, per expiry key. Possible keys are:
   #   * *games*: Expiry associated to queries on games [default: 1 day]
   #   * *mod*: Expiry associated to queries on mod [default: 1 day]
@@ -52,7 +51,6 @@ class NexusMods
     game_domain_name: 'skyrimspecialedition',
     mod_id: 1,
     file_id: 1,
-    http_cache_file: "#{Dir.tmpdir}/nexus_mods_http_cache.json",
     api_cache_expiry: {},
     api_cache_file: "#{Dir.tmpdir}/nexus_mods_api_cache.json",
     logger: Logger.new($stdout),
@@ -66,7 +64,6 @@ class NexusMods
     @premium = false
     @api_client = ApiClient.new(
       api_key:,
-      http_cache_file:,
       api_cache_expiry:,
       api_cache_file:,
       logger:

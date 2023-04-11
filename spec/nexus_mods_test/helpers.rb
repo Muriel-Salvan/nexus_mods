@@ -56,7 +56,6 @@ module NexusModsTest
       if @nexus_mods.nil?
         args[:api_key] = MOCKED_API_KEY unless args.key?(:api_key)
         # By default running tests should not persistent cache files
-        args[:http_cache_file] = nil unless args.key?(:http_cache_file)
         args[:api_cache_file] = nil unless args.key?(:api_cache_file)
         # Redirect any log into a string so that they don't pollute the tests output and they could be asserted.
         @nexus_mods_logger = StringIO.new
@@ -115,11 +114,6 @@ module NexusModsTest
         'User-Agent' => "nexus_mods (#{RUBY_PLATFORM}) Ruby/#{RUBY_VERSION}",
         'apikey' => api_key
       }
-      if @expected_returned_etags.include? mocked_etag
-        expected_request_headers['If-None-Match'] = mocked_etag
-      else
-        @expected_returned_etags << mocked_etag
-      end
       @expected_stubs << [
         stub_request(http_method, "https://#{host}#{path}").with(headers: expected_request_headers).to_return(
           status: [code, message],
@@ -190,9 +184,6 @@ RSpec.configure do |config|
     @nexus_mods = nil
     # Reload the ApiClient as it stores caches at class level
     NexusMods::ApiClient.clear_cacheable_expiry_caches
-    # Keep a list of the etags we should have returned, so that we know when queries should contain them
-    # Array<String>
-    @expected_returned_etags = []
     # List of expected stubs and the number of times they were supposed to mock
     # Array< [ WebMock::RequestStub, Integer ] >
     @expected_stubs = []
@@ -205,6 +196,7 @@ RSpec.configure do |config|
   config.around do |example|
     example.call
   ensure
+    # This would dump the logs in case of debug mode
     reset_nexus_mods
   end
 end

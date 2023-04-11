@@ -21,8 +21,6 @@ Gem::Specification.new do |spec|
 
   # HTTP API library
   spec.add_dependency 'faraday', '~> 2.7'
-  # Handle HTTP cache headers correctly to save on queries
-  spec.add_dependency 'faraday-http-cache', '~> 2.4'
   # Make conditional memoization for queries to NexusMods API
   spec.add_dependency 'cacheable', '~> 2.0'
 
