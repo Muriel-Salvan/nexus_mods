@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'faraday'
+require 'nexus_mods/version'
 require 'nexus_mods/cacheable_api'
 
 class NexusMods
@@ -69,7 +70,7 @@ class NexusMods
       @http_client.send(verb) do |req|
         req.url api_uri(path)
         req.headers['apikey'] = @api_key
-        req.headers['User-Agent'] = "nexus_mods (#{RUBY_PLATFORM}) Ruby/#{RUBY_VERSION}"
+        req.headers['User-Agent'] = "nexus_mods/#{NexusMods::VERSION} (#{RUBY_PLATFORM}) Ruby/#{RUBY_VERSION}"
       end
     end
 

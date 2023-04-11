@@ -111,7 +111,7 @@ module NexusModsTest
       json_as_str = json.to_json
       mocked_etag = "W/\"#{Digest::MD5.hexdigest("#{path}|#{json_as_str}")}\""
       expected_request_headers = {
-        'User-Agent' => "nexus_mods (#{RUBY_PLATFORM}) Ruby/#{RUBY_VERSION}",
+        'User-Agent' => "nexus_mods/#{NexusMods::VERSION} (#{RUBY_PLATFORM}) Ruby/#{RUBY_VERSION}",
         'apikey' => api_key
       }
       @expected_stubs << [
