@@ -360,10 +360,10 @@ class NexusMods
         # or it's older than 1 month
         false
       else
-        mod_updates = updated_mods(game_domain_name:, since: :one_month).find { |mod_updates| mod_updates.mod_id == mod_id }
+        found_mod_updates = updated_mods(game_domain_name:, since: :one_month).find { |mod_updates| mod_updates.mod_id == mod_id }
         # true if it has not been updated on NexusMods since 1 month
         # or our cache timestamp is more recent
-        mod_updates.nil? || mod_updates.latest_mod_activity < existing_cache_timestamp
+        found_mod_updates.nil? || found_mod_updates.latest_mod_activity < existing_cache_timestamp
       end
     if mod_up_to_date
       update_time = updated_mods_cache_timestamp(game_domain_name:, since: :one_month)
@@ -397,10 +397,10 @@ class NexusMods
         # or it's older than 1 month
         false
       else
-        mod_updates = updated_mods(game_domain_name:, since: :one_month).find { |mod_updates| mod_updates.mod_id == mod_id }
+        found_mod_updates = updated_mods(game_domain_name:, since: :one_month).find { |mod_updates| mod_updates.mod_id == mod_id }
         # true if it has not been updated on NexusMods since 1 month
         # or our cache timestamp is more recent
-        mod_updates.nil? || mod_updates.latest_file_update < existing_cache_timestamp
+        found_mod_updates.nil? || found_mod_updates.latest_file_update < existing_cache_timestamp
       end
     if mod_up_to_date
       update_time = updated_mods_cache_timestamp(game_domain_name:, since: :one_month)
