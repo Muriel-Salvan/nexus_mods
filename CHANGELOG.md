@@ -1,3 +1,9 @@
+# [v2.4.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.3.0...v2.4.0) (2023-04-12 17:23:29)
+
+### Features
+
+* [[Feature] Add options and methods for mod and mod_files to query for updates to check data freshness](https://github.com/Muriel-Salvan/nexus_mods/commit/72a933a6ac22faae601fbdc547cc9e0ffa8908fc)
+
 # [v2.3.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.2.0...v2.3.0) (2023-04-12 15:08:22)
 
 ### Features
