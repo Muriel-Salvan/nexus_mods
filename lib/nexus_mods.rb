@@ -218,7 +218,7 @@ class NexusMods
   # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
   # * *mod_id* (Integer): The mod ID [default: @mod_id]
   # * *cache_timestamp* (Time): The cache timestamp to set for this resource
-  def set_mod_cache_timestamp(game_domain_name: @game_domain_name, mod_id: @mod_id, cache_timestamp:)
+  def set_mod_cache_timestamp(cache_timestamp:, game_domain_name: @game_domain_name, mod_id: @mod_id)
     @api_client.set_api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}", cache_timestamp:)
   end
 
@@ -271,7 +271,7 @@ class NexusMods
   # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
   # * *mod_id* (Integer): The mod ID [default: @mod_id]
   # * *cache_timestamp* (Time): The cache timestamp to set for this resource
-  def set_mod_files_cache_timestamp(game_domain_name: @game_domain_name, mod_id: @mod_id, cache_timestamp:)
+  def set_mod_files_cache_timestamp(cache_timestamp:, game_domain_name: @game_domain_name, mod_id: @mod_id)
     @api_client.set_api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}/files", cache_timestamp:)
   end
 
@@ -323,7 +323,7 @@ class NexusMods
   #   * *one_week*: Since 1 week
   #   * *one_month*: Since 1 month
   # * *cache_timestamp* (Time): The cache timestamp to set for this resource
-  def set_updated_mods_cache_timestamp(game_domain_name: @game_domain_name, since: :one_day, cache_timestamp:)
+  def set_updated_mods_cache_timestamp(cache_timestamp:, game_domain_name: @game_domain_name, since: :one_day)
     @api_client.set_api_cache_timestamp("games/#{game_domain_name}/mods/updated", parameters: period_to_url_params(since), cache_timestamp:)
   end
 

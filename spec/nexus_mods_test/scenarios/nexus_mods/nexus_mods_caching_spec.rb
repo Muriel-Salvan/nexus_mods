@@ -213,7 +213,7 @@ describe NexusMods do
             times: 2
           )
           resource_config[:query].call(nexus_mods)
-          resource_config[:set_cache_timestamp].call(nexus_mods, Time.now.utc - 365 * 24 * 60 * 60)
+          resource_config[:set_cache_timestamp].call(nexus_mods, Time.now.utc - (365 * 24 * 60 * 60))
           before = Time.now
           resource_config[:query].call(nexus_mods)
           after = Time.now

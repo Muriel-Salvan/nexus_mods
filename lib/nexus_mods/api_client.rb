@@ -84,7 +84,7 @@ class NexusMods
     # * *parameters* (Hash<Symbol,Object>): Optional parameters to add to the path [default: {}]
     # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
     # * *cache_timestamp* (Time): The cache timestamp to set for this resource
-    def set_api_cache_timestamp(path, parameters: {}, verb: :get, cache_timestamp:)
+    def set_api_cache_timestamp(path, cache_timestamp:, parameters: {}, verb: :get)
       key = ApiClient.cache_key(path, parameters:, verb:)
       Cacheable.cache_adapter.context[key] = {} unless Cacheable.cache_adapter.context.key?(key)
       Cacheable.cache_adapter.context[key]['invalidate_time'] = cache_timestamp.utc.strftime('%FT%T.%9NUTC')
