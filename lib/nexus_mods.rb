@@ -151,6 +151,15 @@ class NexusMods
     @api_client.api_cache_timestamp('games')
   end
 
+  # Set the cached timestamp of the list of games.
+  # This should be used only to update the cache timestamp of a resource we know is still up-to-date without fetching the resource for real again.
+  #
+  # Parameters::
+  # * *cache_timestamp* (Time): The cache timestamp to set for this resource
+  def set_games_cache_timestamp(cache_timestamp:)
+    @api_client.set_api_cache_timestamp('games', cache_timestamp:)
+  end
+
   # Get information about a mod
   #
   # Parameters::
@@ -202,6 +211,17 @@ class NexusMods
     @api_client.api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}")
   end
 
+  # Set the cached timestamp of a mod information.
+  # This should be used only to update the cache timestamp of a resource we know is still up-to-date without fetching the resource for real again.
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # * *cache_timestamp* (Time): The cache timestamp to set for this resource
+  def set_mod_cache_timestamp(cache_timestamp:, game_domain_name: @game_domain_name, mod_id: @mod_id)
+    @api_client.set_api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}", cache_timestamp:)
+  end
+
   # Get files belonging to a mod
   #
   # Parameters::
@@ -244,6 +264,17 @@ class NexusMods
     @api_client.api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}/files")
   end
 
+  # Set the cached timestamp of a mod files information.
+  # This should be used only to update the cache timestamp of a resource we know is still up-to-date without fetching the resource for real again.
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # * *cache_timestamp* (Time): The cache timestamp to set for this resource
+  def set_mod_files_cache_timestamp(cache_timestamp:, game_domain_name: @game_domain_name, mod_id: @mod_id)
+    @api_client.set_api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}/files", cache_timestamp:)
+  end
+
   # Get a list of updated mod ids since a given time
   #
   # Parameters::
@@ -266,7 +297,7 @@ class NexusMods
     end
   end
 
-  # Get the cached timestamp of a mod files information
+  # Get the cached timestamp of updated mod ids
   #
   # Parameters::
   # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
@@ -279,6 +310,21 @@ class NexusMods
   # * Time or nil: Freshness time of the data in the API cache, or nil if not present in the cache
   def updated_mods_cache_timestamp(game_domain_name: @game_domain_name, since: :one_day)
     @api_client.api_cache_timestamp("games/#{game_domain_name}/mods/updated", parameters: period_to_url_params(since))
+  end
+
+  # Set the cached timestamp of updated mod ids.
+  # This should be used only to update the cache timestamp of a resource we know is still up-to-date without fetching the resource for real again.
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *since* (Symbol): The time from which we look for updated mods [default: :one_day]
+  #   Possible values are:
+  #   * *one_day*: Since 1 day
+  #   * *one_week*: Since 1 week
+  #   * *one_month*: Since 1 month
+  # * *cache_timestamp* (Time): The cache timestamp to set for this resource
+  def set_updated_mods_cache_timestamp(cache_timestamp:, game_domain_name: @game_domain_name, since: :one_day)
+    @api_client.set_api_cache_timestamp("games/#{game_domain_name}/mods/updated", parameters: period_to_url_params(since), cache_timestamp:)
   end
 
   private
