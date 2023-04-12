@@ -166,9 +166,13 @@ class NexusMods
   # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
   # * *mod_id* (Integer): The mod ID [default: @mod_id]
   # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
+  # * *check_updates* (Boolean): Should we check updates?
+  #   If yes then an extra call to updated_mods may be done to check for updates before retrieving the mod information.
+  #   In case the mod was previously retrieved and may be in an old cache, then using this will optimize the calls to NexusMods API to the minimum.
   # Result::
   # * Mod: Mod information
-  def mod(game_domain_name: @game_domain_name, mod_id: @mod_id, clear_cache: false)
+  def mod(game_domain_name: @game_domain_name, mod_id: @mod_id, clear_cache: false, check_updates: false)
+    mod_cache_up_to_date?(game_domain_name:, mod_id:) if check_updates
     mod_json = @api_client.api("games/#{game_domain_name}/mods/#{mod_id}", clear_cache:)
     Api::Mod.new(
       uid: mod_json['uid'],
@@ -228,9 +232,13 @@ class NexusMods
   # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
   # * *mod_id* (Integer): The mod ID [default: @mod_id]
   # * *clear_cache* (Boolean): Should we clear the API cache for this resource? [default: false]
+  # * *check_updates* (Boolean): Should we check updates?
+  #   If yes then an extra call to updated_mods may be done to check for updates before retrieving the mod information.
+  #   In case the mod files were previously retrieved and may be in an old cache, then using this will optimize the calls to NexusMods API to the minimum.
   # Result::
   # * Array<ModFile>: List of mod's files
-  def mod_files(game_domain_name: @game_domain_name, mod_id: @mod_id, clear_cache: false)
+  def mod_files(game_domain_name: @game_domain_name, mod_id: @mod_id, clear_cache: false, check_updates: false)
+    mod_files_cache_up_to_date?(game_domain_name:, mod_id:) if check_updates
     @api_client.api("games/#{game_domain_name}/mods/#{mod_id}/files", clear_cache:)['files'].map do |file_json|
       Api::ModFile.new(
         ids: file_json['id'],
@@ -325,6 +333,80 @@ class NexusMods
   # * *cache_timestamp* (Time): The cache timestamp to set for this resource
   def set_updated_mods_cache_timestamp(cache_timestamp:, game_domain_name: @game_domain_name, since: :one_day)
     @api_client.set_api_cache_timestamp("games/#{game_domain_name}/mods/updated", parameters: period_to_url_params(since), cache_timestamp:)
+  end
+
+  # Does a given mod id have fresh information in our cache?
+  # This may fire queries to the updated mods API to get info from NexusMods about the latest updated mods.
+  # If we know the mod is up-to-date, then its mod information cache timestamp will be set to the time when we checked for updates if it was greater than the cache date.
+  #
+  # Here is the algorithm:
+  # If it is not in the cache, then it is not up-to-date.
+  # Otherwise, the API allows us to know if it has been updated up to 1 month in the past.
+  # Therefore if the current cache timestamp is older than 1 month, assume that it has to be updated.
+  # Otherwise query the API to know the latest updated mods since 1 month:
+  # * If the mod ID is not there, then it is up-to-date.
+  # * If the mod ID is there, then check if our cache timestamp is older than the last update timestamp from NexusMods.
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # Result::
+  # * Boolean: Is the mod cache up-to-date?
+  def mod_cache_up_to_date?(game_domain_name: @game_domain_name, mod_id: @mod_id)
+    existing_cache_timestamp = mod_cache_timestamp(game_domain_name:, mod_id:)
+    mod_up_to_date =
+      if existing_cache_timestamp.nil? || existing_cache_timestamp < Time.now - (30 * 24 * 60 * 60)
+        # It's not in the cache
+        # or it's older than 1 month
+        false
+      else
+        mod_updates = updated_mods(game_domain_name:, since: :one_month).find { |mod_updates| mod_updates.mod_id == mod_id }
+        # true if it has not been updated on NexusMods since 1 month
+        # or our cache timestamp is more recent
+        mod_updates.nil? || mod_updates.latest_mod_activity < existing_cache_timestamp
+      end
+    if mod_up_to_date
+      update_time = updated_mods_cache_timestamp(game_domain_name:, since: :one_month)
+      set_mod_cache_timestamp(cache_timestamp: update_time, game_domain_name:, mod_id:) if update_time > existing_cache_timestamp
+    end
+    mod_up_to_date
+  end
+
+  # Does a given mod id have fresh files information in our cache?
+  # This may fire queries to the updated mods API to get info from NexusMods about the latest updated mods.
+  # If we know the mod is up-to-date, then its mod information cache timestamp will be set to the time when we checked for updates if it was greater than the cache date.
+  #
+  # Here is the algorithm:
+  # If it is not in the cache, then it is not up-to-date.
+  # Otherwise, the API allows us to know if it has been updated up to 1 month in the past.
+  # Therefore if the current cache timestamp is older than 1 month, assume that it has to be updated.
+  # Otherwise query the API to know the latest updated mods since 1 month:
+  # * If the mod ID is not there, then it is up-to-date.
+  # * If the mod ID is there, then check if our cache timestamp is older than the last update timestamp from NexusMods.
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # Result::
+  # * Boolean: Is the mod cache up-to-date?
+  def mod_files_cache_up_to_date?(game_domain_name: @game_domain_name, mod_id: @mod_id)
+    existing_cache_timestamp = mod_files_cache_timestamp(game_domain_name:, mod_id:)
+    mod_up_to_date =
+      if existing_cache_timestamp.nil? || existing_cache_timestamp < Time.now - (30 * 24 * 60 * 60)
+        # It's not in the cache
+        # or it's older than 1 month
+        false
+      else
+        mod_updates = updated_mods(game_domain_name:, since: :one_month).find { |mod_updates| mod_updates.mod_id == mod_id }
+        # true if it has not been updated on NexusMods since 1 month
+        # or our cache timestamp is more recent
+        mod_updates.nil? || mod_updates.latest_file_update < existing_cache_timestamp
+      end
+    if mod_up_to_date
+      update_time = updated_mods_cache_timestamp(game_domain_name:, since: :one_month)
+      set_mod_files_cache_timestamp(cache_timestamp: update_time, game_domain_name:, mod_id:) if update_time > existing_cache_timestamp
+    end
+    mod_up_to_date
   end
 
   private
