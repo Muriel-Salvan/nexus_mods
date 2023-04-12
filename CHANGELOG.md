@@ -1,3 +1,9 @@
+# [v2.3.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.2.0...v2.3.0) (2023-04-12 15:08:22)
+
+### Features
+
+* [[Feature] Add a way to set cache timestamps manually](https://github.com/Muriel-Salvan/nexus_mods/commit/7e5ac1d16d1d31f4aa33ebb9a748310e4572a06f)
+
 # [v2.2.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.1.0...v2.2.0) (2023-04-12 12:56:31)
 
 ### Features
