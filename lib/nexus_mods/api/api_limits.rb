@@ -1,9 +1,11 @@
+require 'nexus_mods/api/resource'
+
 class NexusMods
 
   module Api
 
     # Object giving the NexusMods API limits
-    class ApiLimits
+    class ApiLimits < Resource
 
       attr_reader(
         *%i[
@@ -19,6 +21,7 @@ class NexusMods
       # Constructor
       #
       # Parameters::
+      # * *nexus_mods* (NexusMods): The NexusMods API instance that the resource can use to query for other resources
       # * *daily_limit* (Integer): The daily limit
       # * *daily_remaining* (Integer): The daily remaining
       # * *daily_reset* (Integer): The daily reset time
@@ -26,6 +29,7 @@ class NexusMods
       # * *hourly_remaining* (Integer): The hourly remaining
       # * *hourly_reset* (Integer): The hourly reset time
       def initialize(
+        nexus_mods:,
         daily_limit:,
         daily_remaining:,
         daily_reset:,
@@ -33,6 +37,7 @@ class NexusMods
         hourly_remaining:,
         hourly_reset:
       )
+        super(nexus_mods:)
         @daily_limit = daily_limit
         @daily_remaining = daily_remaining
         @daily_reset = daily_reset

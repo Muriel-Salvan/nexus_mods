@@ -1,10 +1,12 @@
+require 'nexus_mods/api/resource'
+
 class NexusMods
 
   module Api
 
     # A user on NExusMods.
     # Mainly used for uploaders information.
-    class User
+    class User < Resource
 
       attr_reader(
         *%i[
@@ -18,16 +20,19 @@ class NexusMods
       # Constructor
       #
       # Parameters::
+      # * *nexus_mods* (NexusMods): The NexusMods API instance that the resource can use to query for other resources
       # * *member_id* (Integer): The user's member id
       # * *member_group_id* (Integer): The user's member group id
       # * *name* (String): The user's name
       # * *profile_url* (String): The user's profile URL
       def initialize(
+        nexus_mods:,
         member_id:,
         member_group_id:,
         name:,
         profile_url:
       )
+        super(nexus_mods:)
         @member_id = member_id
         @member_group_id = member_group_id
         @name = name
