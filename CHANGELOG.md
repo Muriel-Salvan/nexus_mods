@@ -1,3 +1,9 @@
+# [v2.5.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.4.0...v2.5.0) (2023-04-12 19:15:44)
+
+### Features
+
+* [[Feature] Add links between resources](https://github.com/Muriel-Salvan/nexus_mods/commit/84c474b75f3ee1e4ac0c8bbda0d2ad25022f1f07)
+
 # [v2.4.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.3.0...v2.4.0) (2023-04-12 17:23:29)
 
 ### Features
