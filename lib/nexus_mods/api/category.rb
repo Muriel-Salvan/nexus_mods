@@ -1,9 +1,11 @@
+require 'nexus_mods/api/resource'
+
 class NexusMods
 
   module Api
 
     # Categories defined for a game in NexusMods
-    class Category
+    class Category < Resource
 
       attr_reader(
         *%i[
@@ -21,14 +23,17 @@ class NexusMods
       # Constructor
       #
       # Parameters::
+      # * *nexus_mods* (NexusMods): The NexusMods API instance that the resource can use to query for other resources
       # *id* (Integer): The category id
       # *name* (String): The category id
       # *parent_category* (Category or nil): The parent category, or nil if none [default: nil]
       def initialize(
+        nexus_mods:,
         id:,
         name:,
         parent_category: nil
       )
+        super(nexus_mods:)
         @id = id
         @name = name
         @parent_category = parent_category

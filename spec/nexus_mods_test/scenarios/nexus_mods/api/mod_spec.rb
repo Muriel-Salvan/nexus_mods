@@ -63,6 +63,14 @@ describe NexusMods::Api::Mod do
         expect(mod1).to eq mod2
       end
 
+      it 'returns the mod files associated to the mod' do
+        expect_http_call_to(
+          path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
+          json: { 'files' => [json_mod_file2472] }
+        )
+        expect_mod_file_to_be2472(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014).files.first)
+      end
+
     end
 
     context 'when checking cache data freshness' do

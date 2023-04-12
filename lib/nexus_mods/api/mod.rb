@@ -1,3 +1,5 @@
+require 'nexus_mods/api/resource'
+
 class NexusMods
 
   module Api
@@ -5,7 +7,7 @@ class NexusMods
     # A NexusMods mod.
     # Attributes info can be taken from there:
     # * https://github.com/Nexus-Mods/node-nexus-api/blob/master/docs/interfaces/_types_.imodinfo.md
-    class Mod
+    class Mod < Resource
 
       attr_reader(
         *%i[
@@ -36,6 +38,7 @@ class NexusMods
       # Constructor
       #
       # Parameters::
+      # * *nexus_mods* (NexusMods): The NexusMods API instance that the resource can use to query for other resources
       # * *uid* (Integer): The mod's uid
       # * *mod_id* (Integer): The mod's id
       # * *game_id* (Integer): The mod's game id
@@ -58,6 +61,7 @@ class NexusMods
       # * *unique_downloads_count* (Integer): The mod's unique downloads' count [default: 0]
       # * *endorsements_count* (Integer): The mod's endorsements' count [default: 0]
       def initialize(
+        nexus_mods:,
         uid:,
         mod_id:,
         game_id:,
@@ -80,6 +84,7 @@ class NexusMods
         unique_downloads_count: 0,
         endorsements_count: 0
       )
+        super(nexus_mods:)
         @uid = uid
         @mod_id = mod_id
         @game_id = game_id
@@ -132,6 +137,14 @@ class NexusMods
           @downloads_count == other.downloads_count &&
           @unique_downloads_count == other.unique_downloads_count &&
           @endorsements_count == other.endorsements_count
+      end
+
+      # Get associated files information
+      #
+      # Result::
+      # * Array<ModFile>: The list of mod files information
+      def files
+        @nexus_mods.mod_files(game_domain_name: domain_name, mod_id:)
       end
 
     end

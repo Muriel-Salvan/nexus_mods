@@ -88,6 +88,7 @@ class NexusMods
   def api_limits
     api_limits_headers = @api_client.http('users/validate').headers
     Api::ApiLimits.new(
+      nexus_mods: self,
       daily_limit: Integer(api_limits_headers['x-rl-daily-limit']),
       daily_remaining: Integer(api_limits_headers['x-rl-daily-remaining']),
       daily_reset: Time.parse(api_limits_headers['x-rl-daily-reset']).utc,
@@ -113,6 +114,7 @@ class NexusMods
           category_id,
           [
             Api::Category.new(
+              nexus_mods: self,
               id: category_id,
               name: category_json['name']
             ),
@@ -125,6 +127,7 @@ class NexusMods
         category.parent_category = categories[parent_category_id]&.first if parent_category_id
       end
       Api::Game.new(
+        nexus_mods: self,
         id: game_json['id'],
         name: game_json['name'],
         forum_url: game_json['forum_url'],
@@ -175,6 +178,7 @@ class NexusMods
     mod_cache_up_to_date?(game_domain_name:, mod_id:) if check_updates
     mod_json = @api_client.api("games/#{game_domain_name}/mods/#{mod_id}", clear_cache:)
     Api::Mod.new(
+      nexus_mods: self,
       uid: mod_json['uid'],
       mod_id: mod_json['mod_id'],
       game_id: mod_json['game_id'],
@@ -189,6 +193,7 @@ class NexusMods
       status: mod_json['status'],
       available: mod_json['available'],
       uploader: Api::User.new(
+        nexus_mods: self,
         member_id: mod_json['user']['member_id'],
         member_group_id: mod_json['user']['member_group_id'],
         name: mod_json['user']['name'],
@@ -241,6 +246,9 @@ class NexusMods
     mod_files_cache_up_to_date?(game_domain_name:, mod_id:) if check_updates
     @api_client.api("games/#{game_domain_name}/mods/#{mod_id}/files", clear_cache:)['files'].map do |file_json|
       Api::ModFile.new(
+        nexus_mods: self,
+        game_domain_name:,
+        mod_id:,
         ids: file_json['id'],
         uid: file_json['uid'],
         id: file_json['file_id'],
@@ -298,6 +306,8 @@ class NexusMods
   def updated_mods(game_domain_name: @game_domain_name, since: :one_day, clear_cache: false)
     @api_client.api("games/#{game_domain_name}/mods/updated", parameters: period_to_url_params(since), clear_cache:).map do |updated_mod_json|
       Api::ModUpdates.new(
+        nexus_mods: self,
+        game_domain_name:,
         mod_id: updated_mod_json['mod_id'],
         latest_file_update: Time.at(updated_mod_json['latest_file_update']).utc,
         latest_mod_activity: Time.at(updated_mod_json['latest_mod_activity']).utc

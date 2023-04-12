@@ -1,3 +1,5 @@
+require 'nexus_mods/api/resource'
+
 class NexusMods
 
   module Api
@@ -5,7 +7,7 @@ class NexusMods
     # A NexusMods game.
     # Attributes info can be taken from there:
     # * https://github.com/Nexus-Mods/node-nexus-api/blob/master/docs/interfaces/_types_.igameinfo.md
-    class Game
+    class Game < Resource
 
       attr_reader(
         *%i[
@@ -29,6 +31,7 @@ class NexusMods
       # Constructor
       #
       # Parameters::
+      # * *nexus_mods* (NexusMods): The NexusMods API instance that the resource can use to query for other resources
       # * *id* (Integer): The game's id
       # * *name* (String): The game's name
       # * *forum_url* (String): The game's forum's URL
@@ -44,6 +47,7 @@ class NexusMods
       # * *mods_count* (Integer): The game's mods' count [default: 0]
       # * *categories* (Array<Category>): The list of game's categories [default: []]
       def initialize(
+        nexus_mods:,
         id:,
         name:,
         forum_url:,
@@ -59,6 +63,7 @@ class NexusMods
         mods_count: 0,
         categories: []
       )
+        super(nexus_mods:)
         @id = id
         @name = name
         @forum_url = forum_url

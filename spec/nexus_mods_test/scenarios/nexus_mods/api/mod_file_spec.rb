@@ -60,6 +60,14 @@ describe NexusMods::Api::ModFile do
         expect_mod_files_to_be_example(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition'))
       end
 
+      it 'returns the mod associated to the mod file' do
+        expect_http_call_to(
+          path: '/v1/games/skyrimspecialedition/mods/2014.json',
+          json: json_complete_mod
+        )
+        expect_mod_to_be_complete(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014).first.mod)
+      end
+
     end
 
     it 'compares objects for equality' do
@@ -83,6 +91,7 @@ describe NexusMods::Api::ModFile do
       archived: 7,
       unknown: 100
     }.each do |category, category_id|
+
       it "accepts mod files having category #{category}" do
         expect_http_call_to(
           path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
@@ -119,6 +128,7 @@ describe NexusMods::Api::ModFile do
         expect(mod_file.category).to eq category
         expect(mod_file.category_id).to eq category_id
       end
+
     end
 
     context 'when checking cache data freshness' do

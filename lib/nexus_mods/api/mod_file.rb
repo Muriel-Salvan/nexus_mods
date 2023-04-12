@@ -1,3 +1,5 @@
+require 'nexus_mods/api/resource'
+
 class NexusMods
 
   module Api
@@ -5,10 +7,12 @@ class NexusMods
     # A NexusMods file.
     # Attributes info can be taken from there:
     # * https://github.com/Nexus-Mods/node-nexus-api/blob/master/docs/interfaces/_types_.ifileinfo.md
-    class ModFile
+    class ModFile < Resource
 
       attr_reader(
         *%i[
+          game_domain_name
+          mod_id
           ids
           uid
           id
@@ -43,6 +47,9 @@ class NexusMods
       # Constructor
       #
       # Parameters::
+      # * *nexus_mods* (NexusMods): The NexusMods API instance that the resource can use to query for other resources
+      # * *game_domain_name* (String): The game this file belongs to
+      # * *mod_id* (Integer): The mod id this file belongs to
       # * *ids* (Array<Integer>): The file's list of IDs
       # * *uid* (Integer): The file's UID
       # * *id* (Integer): The file's main ID
@@ -60,6 +67,9 @@ class NexusMods
       # * *changelog_html* (String): The file's change log in HTML
       # * *content_preview_url* (String): URL to a JSON that gives info on the file's content
       def initialize(
+        nexus_mods:,
+        game_domain_name:,
+        mod_id:,
         ids:,
         uid:,
         id:,
@@ -77,6 +87,9 @@ class NexusMods
         changelog_html:,
         content_preview_url:
       )
+        super(nexus_mods:)
+        @game_domain_name = game_domain_name
+        @mod_id = mod_id
         @ids = ids
         @uid = uid
         @id = id
@@ -105,6 +118,8 @@ class NexusMods
       # * Boolean: Are objects equal?
       def ==(other)
         other.is_a?(ModFile) &&
+          @game_domain_name == other.game_domain_name &&
+          @mod_id == other.mod_id &&
           @ids == other.ids &&
           @uid == other.uid &&
           @id == other.id &&
@@ -121,6 +136,14 @@ class NexusMods
           @description == other.description &&
           @changelog_html == other.changelog_html &&
           @content_preview_url == other.content_preview_url
+      end
+
+      # Get associated mod information
+      #
+      # Result::
+      # * Mod: The corresponding mod
+      def mod
+        @nexus_mods.mod(game_domain_name:, mod_id:)
       end
 
     end
