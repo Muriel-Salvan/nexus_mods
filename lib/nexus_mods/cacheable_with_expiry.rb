@@ -45,7 +45,7 @@ class NexusMods
                     expiry_cache[key].nil? || (Time.now.utc - Time.parse(context['invalidate_time']).utc > expiry_cache[key])
                   end,
                   update_context_after_fetch: proc do |_key, _value, _options, context|
-                    context['invalidate_time'] = Time.now.utc.strftime('%FT%TUTC')
+                    context['invalidate_time'] = Time.now.utc.strftime('%FT%T.%9NUTC')
                   end
                 }
               )

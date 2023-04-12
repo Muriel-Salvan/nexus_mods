@@ -45,3 +45,7 @@ RSpec/MultipleExpectations:
 RSpec/StubbedMock:
   Exclude:
     - '**/*'
+
+# Accept a bit more context nesting
+RSpec/NestedGroups:
+  Max: 4

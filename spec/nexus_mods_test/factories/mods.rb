@@ -5,7 +5,7 @@ module NexusModsTest
     module Mods
 
       # Example of JSON object returned by the API for a mod information, having all possible fields
-      def json_complete_mod
+      def self.json_complete_mod
         {
           'name' => 'ApachiiSkyHair SSE',
           'summary' => 'New Female and Male Hairstyles for Humans, Elves and Orcs. Converted hair from Sims2 and Sims3.<br />Standalone version.',
@@ -44,8 +44,12 @@ module NexusModsTest
         }
       end
 
+      def json_complete_mod
+        Mods.json_complete_mod
+      end
+
       # Example of JSON object returned by the API for a mod information, having minimum fields
-      def json_partial_mod
+      def self.json_partial_mod
         {
           'mod_downloads' => 13_634_545,
           'mod_unique_downloads' => 4_052_221,
@@ -73,6 +77,10 @@ module NexusModsTest
             'name' => 'apachii'
           }
         }
+      end
+
+      def json_partial_mod
+        Mods.json_partial_mod
       end
 
       # Expect a mod to be the example complete one

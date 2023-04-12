@@ -5,7 +5,7 @@ module NexusModsTest
     module ModFiles
 
       # Test mod file with id 2472
-      def json_mod_file2472
+      def self.json_mod_file2472
         {
           'id' => [
             2472,
@@ -32,8 +32,12 @@ module NexusModsTest
         }
       end
 
+      def json_mod_file2472
+        ModFiles.json_mod_file2472
+      end
+
       # Test mod file with id 2487
-      def json_mod_file2487
+      def self.json_mod_file2487
         {
           'id' => [
             2487,
@@ -58,6 +62,10 @@ module NexusModsTest
           'changelog_html' => nil,
           'content_preview_link' => 'https://file-metadata.nexusmods.com/file/nexus-files-meta/1704/2014/ApachiiSkyHairMale_v_1_2-2014-1-2.7z.json'
         }
+      end
+
+      def json_mod_file2487
+        ModFiles.json_mod_file2487
       end
 
       # Expect a mod's file to be the example one with id 2472

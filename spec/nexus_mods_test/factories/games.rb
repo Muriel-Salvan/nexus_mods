@@ -5,7 +5,7 @@ module NexusModsTest
     module Games
 
       # Test game with id 100
-      def json_game100
+      def self.json_game100
         {
           'id' => 100,
           'name' => 'Morrowind',
@@ -35,8 +35,12 @@ module NexusModsTest
         }
       end
 
+      def json_game100
+        Games.json_game100
+      end
+
       # Test game with id 101
-      def json_game101
+      def self.json_game101
         {
           'id' => 101,
           'name' => 'Oblivion',
@@ -64,6 +68,10 @@ module NexusModsTest
             }
           ]
         }
+      end
+
+      def json_game101
+        Games.json_game101
       end
 
       # Expect a game to be the test game of id 100

@@ -60,6 +60,22 @@ class NexusMods
       cached_api(path, parameters:, verb:)
     end
 
+    # Get the timestamp of the cached data linked to a given API call
+    #
+    # Parameters::
+    # * *path* (String): API path to contact (from v1/ and without .json)
+    # * *parameters* (Hash<Symbol,Object>): Optional parameters to add to the path [default: {}]
+    # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
+    # Result::
+    # * Time or nil: The refresh time of the data, or nil if not part of the cache
+    def api_cache_timestamp(path, parameters: {}, verb: :get)
+      key = ApiClient.cache_key(path, parameters:, verb:)
+      return unless Cacheable.cache_adapter.exist?(key)
+
+      str_time = Cacheable.cache_adapter.context.dig(key, 'invalidate_time')
+      str_time.nil? ? nil : Time.parse(str_time)
+    end
+
     # Send an HTTP request to the API and get back the HTTP response
     #
     # Parameters::
@@ -98,6 +114,18 @@ class NexusMods
 
       # ApiClient: The API client to be used by the cacheable adapter (singleton pattern)
       attr_accessor :api_client
+
+      # Get the cache key to be used for a given API query
+      #
+      # Parameters::
+      # * *path* (String): API path to contact (from v1/ and without .json)
+      # * *parameters* (Hash<Symbol,Object>): Optional parameters to add to the path [default: {}]
+      # * *verb* (Symbol): Verb to be used (:get, :post...) [default: :get]
+      # Result::
+      # * String: The corresponding cache key
+      def cache_key(path, parameters:, verb:)
+        "#{verb}/#{path}#{parameters.empty? ? '' : "/#{parameters.map { |param, value| "#{param}=#{value}" }.sort.join('/')}"}"
+      end
 
     end
 
@@ -142,9 +170,7 @@ class NexusMods
     cacheable_api(
       :cached_api,
       key_format: proc do |_target, _method_name, method_args, method_kwargs|
-        "#{method_kwargs[:verb]}/#{method_args.first}#{
-          method_kwargs[:parameters].empty? ? '' : "/#{method_kwargs[:parameters].map { |param, value| "#{param}=#{value}" }.sort.join('/')}"
-        }"
+        cache_key(method_args.first, parameters: method_kwargs[:parameters], verb: method_kwargs[:verb])
       end,
       expiry_from_key: proc do |key|
         # Example of keys:
