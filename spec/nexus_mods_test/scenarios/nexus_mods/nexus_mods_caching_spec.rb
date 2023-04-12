@@ -20,6 +20,7 @@ describe NexusMods do
         query: proc { |nm| nm.games },
         query_without_cache: proc { |nm| nm.games(clear_cache: true) },
         get_cache_timestamp: proc { |nm| nm.games_cache_timestamp },
+        set_cache_timestamp: proc { |nm, ts| nm.set_games_cache_timestamp(cache_timestamp: ts) },
         expiry_cache_param: :games
       },
       'mods' => {
@@ -28,6 +29,7 @@ describe NexusMods do
         query: proc { |nm| nm.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
         query_without_cache: proc { |nm| nm.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true) },
         get_cache_timestamp: proc { |nm| nm.mod_cache_timestamp(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
+        set_cache_timestamp: proc { |nm, ts| nm.set_mod_cache_timestamp(game_domain_name: 'skyrimspecialedition', mod_id: 2014, cache_timestamp: ts) },
         expiry_cache_param: :mod
       },
       'mod files' => {
@@ -41,6 +43,7 @@ describe NexusMods do
         query: proc { |nm| nm.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
         query_without_cache: proc { |nm| nm.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true) },
         get_cache_timestamp: proc { |nm| nm.mod_files_cache_timestamp(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
+        set_cache_timestamp: proc { |nm, ts| nm.set_mod_files_cache_timestamp(game_domain_name: 'skyrimspecialedition', mod_id: 2014, cache_timestamp: ts) },
         expiry_cache_param: :mod_files
       }
     }.merge(
@@ -68,7 +71,8 @@ describe NexusMods do
             ],
             query: proc { |nm| nm.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since]) },
             query_without_cache: proc { |nm| nm.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since], clear_cache: true) },
-            get_cache_timestamp: proc { |nm| nm.updated_mods_cache_timestamp(game_domain_name: 'skyrimspecialedition', since: since_config[:since]) }
+            get_cache_timestamp: proc { |nm| nm.updated_mods_cache_timestamp(game_domain_name: 'skyrimspecialedition', since: since_config[:since]) },
+            set_cache_timestamp: proc { |nm, ts| nm.set_updated_mods_cache_timestamp(game_domain_name: 'skyrimspecialedition', since: since_config[:since], cache_timestamp: ts) }
           }
         ]
       end
@@ -131,6 +135,18 @@ describe NexusMods do
           expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to be_between(before, after)
         end
 
+        it 'changes manually the timestamp of the data stored in the API cache' do
+          expect_validate_user
+          expect_http_call_to(
+            path: resource_config[:expected_api_path],
+            json: resource_config[:mocked_api_json]
+          )
+          resource_config[:query].call(nexus_mods)
+          new_cache_timestamp = Time.parse('2023-01-12 11:22:33 UTC')
+          resource_config[:set_cache_timestamp].call(nexus_mods, new_cache_timestamp)
+          expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to eq new_cache_timestamp
+        end
+
         it 'retrieves the timestamp of the games data stored in the cache even after cache is used' do
           expect_validate_user
           expect_http_call_to(
@@ -159,7 +175,22 @@ describe NexusMods do
           end
         end
 
-        it 'updates the timestamp of the data stored in the API cache' do
+        it 'persists the cache timestamp that has been changed manually' do
+          with_api_cache_file do |api_cache_file|
+            expect_validate_user(times: 2)
+            expect_http_call_to(
+              path: resource_config[:expected_api_path],
+              json: resource_config[:mocked_api_json]
+            )
+            resource_config[:query].call(nexus_mods(api_cache_file:))
+            new_cache_timestamp = Time.parse('2023-01-12 11:22:33 UTC')
+            resource_config[:set_cache_timestamp].call(nexus_mods, new_cache_timestamp)
+            reset_nexus_mods
+            expect(resource_config[:get_cache_timestamp].call(nexus_mods(api_cache_file:))).to eq new_cache_timestamp
+          end
+        end
+
+        it 'updates the timestamp of the data stored in the API cache by forcing an API query' do
           expect_validate_user
           expect_http_call_to(
             path: resource_config[:expected_api_path],
@@ -170,6 +201,21 @@ describe NexusMods do
           sleep 1
           before = Time.now
           resource_config[:query_without_cache].call(nexus_mods)
+          after = Time.now
+          expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to be_between(before, after)
+        end
+
+        it 'updates the timestamp of the data stored in the API cache by updating manually the cache timestamp' do
+          expect_validate_user
+          expect_http_call_to(
+            path: resource_config[:expected_api_path],
+            json: resource_config[:mocked_api_json],
+            times: 2
+          )
+          resource_config[:query].call(nexus_mods)
+          resource_config[:set_cache_timestamp].call(nexus_mods, Time.now.utc - 365 * 24 * 60 * 60)
+          before = Time.now
+          resource_config[:query].call(nexus_mods)
           after = Time.now
           expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to be_between(before, after)
         end
