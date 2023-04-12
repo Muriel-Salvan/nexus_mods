@@ -1,3 +1,9 @@
+# [v2.2.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.1.0...v2.2.0) (2023-04-12 12:56:31)
+
+### Features
+
+* [[Feature] Add possibility to retrieve the cache timestamp of API resources](https://github.com/Muriel-Salvan/nexus_mods/commit/ba67323a32472deb1f063a51683ff9282ef96981)
+
 # [v2.1.0](https://github.com/Muriel-Salvan/nexus_mods/compare/v2.0.1...v2.1.0) (2023-04-11 18:24:04)
 
 ### Features
