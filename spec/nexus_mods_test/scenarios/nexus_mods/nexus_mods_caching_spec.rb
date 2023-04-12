@@ -10,163 +10,245 @@ describe NexusMods do
       nexus_mods.api_limits
     end
 
-    it 'caches games queries' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games.json',
-        json: [
-          json_game100,
-          json_game101
-        ]
-      )
-      games = nexus_mods.games
-      expect(nexus_mods.games).to eq games
-    end
-
-    it 'does not cache games queries if asked' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games.json',
-        json: [
-          json_game100,
-          json_game101
-        ],
-        times: 2
-      )
-      games = nexus_mods.games
-      expect(nexus_mods.games(clear_cache: true)).to eq games
-    end
-
-    it 'caches mod queries' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games/skyrimspecialedition/mods/2014.json',
-        json: json_complete_mod
-      )
-      mod = nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod
-    end
-
-    it 'does not cache mod queries if asked' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games/skyrimspecialedition/mods/2014.json',
-        json: json_complete_mod,
-        times: 2
-      )
-      mod = nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq mod
-    end
-
-    it 'caches mod files queries' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
-        json: { files: [json_mod_file2472, json_mod_file2487] }
-      )
-      mod_files = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod_files
-    end
-
-    it 'does not cache mod files queries if asked' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
-        json: { files: [json_mod_file2472, json_mod_file2487] },
-        times: 2
-      )
-      mod_files = nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      expect(nexus_mods.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true)).to eq mod_files
-    end
-
     {
-      'last day' => {
-        since: :one_day,
-        expected_url_params: 'period=1d'
+      'games' => {
+        expected_api_path: '/v1/games.json',
+        mocked_api_json: [
+          NexusModsTest::Factories::Games.json_game100,
+          NexusModsTest::Factories::Games.json_game101
+        ],
+        query: proc { |nm| nm.games },
+        query_without_cache: proc { |nm| nm.games(clear_cache: true) },
+        get_cache_timestamp: proc { |nm| nm.games_cache_timestamp },
+        expiry_cache_param: :games
       },
-      'last week' => {
-        since: :one_week,
-        expected_url_params: 'period=1w'
+      'mods' => {
+        expected_api_path: '/v1/games/skyrimspecialedition/mods/2014.json',
+        mocked_api_json: NexusModsTest::Factories::Mods.json_complete_mod,
+        query: proc { |nm| nm.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
+        query_without_cache: proc { |nm| nm.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true) },
+        get_cache_timestamp: proc { |nm| nm.mod_cache_timestamp(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
+        expiry_cache_param: :mod
       },
-      'last month' => {
-        since: :one_month,
-        expected_url_params: 'period=1m'
+      'mod files' => {
+        expected_api_path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
+        mocked_api_json: {
+          files: [
+            NexusModsTest::Factories::ModFiles.json_mod_file2472,
+            NexusModsTest::Factories::ModFiles.json_mod_file2487
+          ]
+        },
+        query: proc { |nm| nm.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
+        query_without_cache: proc { |nm| nm.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014, clear_cache: true) },
+        get_cache_timestamp: proc { |nm| nm.mod_files_cache_timestamp(game_domain_name: 'skyrimspecialedition', mod_id: 2014) },
+        expiry_cache_param: :mod_files
       }
-    }.each do |since, since_config|
+    }.merge(
+      {
+        'last day' => {
+          since: :one_day,
+          expected_url_params: 'period=1d'
+        },
+        'last week' => {
+          since: :one_week,
+          expected_url_params: 'period=1w'
+        },
+        'last month' => {
+          since: :one_month,
+          expected_url_params: 'period=1m'
+        }
+      }.to_h do |since, since_config|
+        [
+          "mod updates since #{since}",
+          {
+            expected_api_path: "/v1/games/skyrimspecialedition/mods/updated.json?#{since_config[:expected_url_params]}",
+            mocked_api_json: [
+              NexusModsTest::Factories::ModUpdates.json_mod_updates2014,
+              NexusModsTest::Factories::ModUpdates.json_mod_updates100
+            ],
+            query: proc { |nm| nm.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since]) },
+            query_without_cache: proc { |nm| nm.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since], clear_cache: true) },
+            get_cache_timestamp: proc { |nm| nm.updated_mods_cache_timestamp(game_domain_name: 'skyrimspecialedition', since: since_config[:since]) }
+          }
+        ]
+      end
+    ).each do |resource, resource_config|
 
-      context "when testing updated months since #{since}" do
+      context "when testing #{resource}" do
 
-        it 'caches mod updates queries' do
+        it 'caches API queries' do
           expect_validate_user
           expect_http_call_to(
-            path: "/v1/games/skyrimspecialedition/mods/updated.json?#{since_config[:expected_url_params]}",
-            json: [
-              json_mod_updates2014,
-              json_mod_updates100
-            ]
+            path: resource_config[:expected_api_path],
+            json: resource_config[:mocked_api_json]
           )
-          mod_updates = nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since])
-          expect(nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since])).to eq mod_updates
+          resource = resource_config[:query].call(nexus_mods)
+          expect(resource_config[:query].call(nexus_mods)).to eq resource
         end
 
-        it 'does not cache mod updates queries if asked' do
+        it 'does not cache API queries if asked' do
           expect_validate_user
           expect_http_call_to(
-            path: "/v1/games/skyrimspecialedition/mods/updated.json?#{since_config[:expected_url_params]}",
-            json: [
-              json_mod_updates2014,
-              json_mod_updates100
-            ],
+            path: resource_config[:expected_api_path],
+            json: resource_config[:mocked_api_json],
             times: 2
           )
-          mod_updates = nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since])
-          expect(nexus_mods.updated_mods(game_domain_name: 'skyrimspecialedition', since: since_config[:since], clear_cache: true)).to eq mod_updates
+          resource = resource_config[:query].call(nexus_mods)
+          expect(resource_config[:query_without_cache].call(nexus_mods)).to eq resource
+        end
+
+        if resource_config[:expiry_cache_param]
+
+          it 'expires API queries cache' do
+            expect_validate_user
+            expect_http_call_to(
+              path: resource_config[:expected_api_path],
+              json: resource_config[:mocked_api_json],
+              times: 2
+            )
+            nexus_mods_instance = nexus_mods(api_cache_expiry: { resource_config[:expiry_cache_param] => 1 })
+            resource = resource_config[:query].call(nexus_mods_instance)
+            sleep 2
+            expect(resource_config[:query].call(nexus_mods_instance)).to eq resource
+          end
+
+        end
+
+        it 'stores no timestamp of the data stored in the API cache before fetching data' do
+          expect_validate_user
+          expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to be_nil
+        end
+
+        it 'retrieves the timestamp of the data stored in the API cache' do
+          expect_validate_user
+          expect_http_call_to(
+            path: resource_config[:expected_api_path],
+            json: resource_config[:mocked_api_json]
+          )
+          before = Time.now
+          resource_config[:query].call(nexus_mods)
+          after = Time.now
+          expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to be_between(before, after)
+        end
+
+        it 'retrieves the timestamp of the games data stored in the cache even after cache is used' do
+          expect_validate_user
+          expect_http_call_to(
+            path: resource_config[:expected_api_path],
+            json: resource_config[:mocked_api_json]
+          )
+          before = Time.now
+          resource_config[:query].call(nexus_mods)
+          after = Time.now
+          resource_config[:query].call(nexus_mods)
+          expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to be_between(before, after)
+        end
+
+        it 'retrieves the timestamp of the games data stored in the cache even after cache is persisted' do
+          with_api_cache_file do |api_cache_file|
+            expect_validate_user(times: 2)
+            expect_http_call_to(
+              path: resource_config[:expected_api_path],
+              json: resource_config[:mocked_api_json]
+            )
+            before = Time.now
+            resource_config[:query].call(nexus_mods(api_cache_file:))
+            after = Time.now
+            reset_nexus_mods
+            expect(resource_config[:get_cache_timestamp].call(nexus_mods(api_cache_file:))).to be_between(before, after)
+          end
+        end
+
+        it 'updates the timestamp of the data stored in the API cache' do
+          expect_validate_user
+          expect_http_call_to(
+            path: resource_config[:expected_api_path],
+            json: resource_config[:mocked_api_json],
+            times: 2
+          )
+          resource_config[:query].call(nexus_mods)
+          sleep 1
+          before = Time.now
+          resource_config[:query_without_cache].call(nexus_mods)
+          after = Time.now
+          expect(resource_config[:get_cache_timestamp].call(nexus_mods)).to be_between(before, after)
+        end
+
+        context 'when testing cache persistence in files' do
+
+          it 'persists API cache in a file' do
+            with_api_cache_file do |api_cache_file|
+              expect_validate_user
+              expect_http_call_to(
+                path: resource_config[:expected_api_path],
+                json: resource_config[:mocked_api_json]
+              )
+              resource_config[:query].call(nexus_mods(api_cache_file:))
+              expect(File.exist?(api_cache_file)).to be true
+              expect(File.size(api_cache_file)).to be > 0
+            end
+          end
+
+          it 'uses API cache from a file' do
+            with_api_cache_file do |api_cache_file|
+              expect_validate_user(times: 2)
+              expect_http_call_to(
+                path: resource_config[:expected_api_path],
+                json: resource_config[:mocked_api_json]
+              )
+              # Generate the cache first
+              resource = resource_config[:query].call(nexus_mods(api_cache_file:))
+              # Force a new instance of NexusMods API to run
+              reset_nexus_mods
+              expect(resource_config[:query].call(nexus_mods(api_cache_file:))).to eq resource
+            end
+          end
+
+          if resource_config[:expiry_cache_param]
+
+            it 'uses API cache from a file, taking expiry time into account' do
+              with_api_cache_file do |api_cache_file|
+                expect_validate_user(times: 2)
+                expect_http_call_to(
+                  path: resource_config[:expected_api_path],
+                  json: resource_config[:mocked_api_json],
+                  times: 2
+                )
+                # Generate the cache first
+                resource = resource_config[:query].call(nexus_mods(api_cache_file:, api_cache_expiry: { resource_config[:expiry_cache_param] => 1 }))
+                # Force a new instance of NexusMods API to run
+                reset_nexus_mods
+                sleep 2
+                # As the expiry time is 1 second, then the cache should still be invalidated
+                expect(resource_config[:query].call(nexus_mods(api_cache_file:, api_cache_expiry: { resource_config[:expiry_cache_param] => 1 }))).to eq resource
+              end
+            end
+
+            it 'uses API cache from a file, taking expiry time of the new process into account' do
+              with_api_cache_file do |api_cache_file|
+                expect_validate_user(times: 2)
+                expect_http_call_to(
+                  path: resource_config[:expected_api_path],
+                  json: resource_config[:mocked_api_json],
+                  times: 2
+                )
+                # Generate the cache first
+                resource = resource_config[:query].call(nexus_mods(api_cache_file:, api_cache_expiry: { resource_config[:expiry_cache_param] => 10 }))
+                # Force a new instance of NexusMods API to run
+                reset_nexus_mods
+                sleep 2
+                # Even if the expiry time was 10 seconds while fetching the resource,
+                # if we decide it has to be 1 second now then it has to be invalidated.
+                expect(resource_config[:query].call(nexus_mods(api_cache_file:, api_cache_expiry: { resource_config[:expiry_cache_param] => 1 }))).to eq resource
+              end
+            end
+
+          end
+
         end
 
       end
 
-    end
-
-    it 'expires games queries cache' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games.json',
-        json: [
-          json_game100,
-          json_game101
-        ],
-        times: 2
-      )
-      nexus_mods_instance = nexus_mods(api_cache_expiry: { games: 1 })
-      games = nexus_mods_instance.games
-      sleep 2
-      expect(nexus_mods_instance.games).to eq games
-    end
-
-    it 'expires mod queries cache' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games/skyrimspecialedition/mods/2014.json',
-        json: json_complete_mod,
-        times: 2
-      )
-      nexus_mods_instance = nexus_mods(api_cache_expiry: { mod: 1 })
-      mod = nexus_mods_instance.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      sleep 2
-      expect(nexus_mods_instance.mod(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod
-    end
-
-    it 'expires mod files queries cache' do
-      expect_validate_user
-      expect_http_call_to(
-        path: '/v1/games/skyrimspecialedition/mods/2014/files.json',
-        json: { files: [json_mod_file2472, json_mod_file2487] },
-        times: 2
-      )
-      nexus_mods_instance = nexus_mods(api_cache_expiry: { mod_files: 1 })
-      mod_files = nexus_mods_instance.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)
-      sleep 2
-      expect(nexus_mods_instance.mod_files(game_domain_name: 'skyrimspecialedition', mod_id: 2014)).to eq mod_files
     end
 
     it 'only clears the cache of the wanted resource' do
@@ -189,83 +271,6 @@ describe NexusMods do
     end
 
     context 'with file persistence' do
-
-      it 'persists API cache in a file' do
-        with_api_cache_file do |api_cache_file|
-          expect_validate_user
-          expect_http_call_to(
-            path: '/v1/games.json',
-            json: [
-              json_game100,
-              json_game101
-            ]
-          )
-          nexus_mods(api_cache_file:).games
-          expect(File.exist?(api_cache_file)).to be true
-          expect(File.size(api_cache_file)).to be > 0
-        end
-      end
-
-      it 'uses API cache from a file' do
-        with_api_cache_file do |api_cache_file|
-          expect_validate_user(times: 2)
-          expect_http_call_to(
-            path: '/v1/games.json',
-            json: [
-              json_game100,
-              json_game101
-            ]
-          )
-          # Generate the cache first
-          games = nexus_mods(api_cache_file:).games
-          # Force a new instance of NexusMods API to run
-          reset_nexus_mods
-          expect(nexus_mods(api_cache_file:).games).to eq games
-        end
-      end
-
-      it 'uses API cache from a file, taking expiry time into account' do
-        with_api_cache_file do |api_cache_file|
-          expect_validate_user(times: 2)
-          expect_http_call_to(
-            path: '/v1/games.json',
-            json: [
-              json_game100,
-              json_game101
-            ],
-            times: 2
-          )
-          # Generate the cache first
-          games = nexus_mods(api_cache_file:, api_cache_expiry: { games: 1 }).games
-          # Force a new instance of NexusMods API to run
-          reset_nexus_mods
-          sleep 2
-          # As the expiry time is 1 second, then the cache should still be invalidated
-          expect(nexus_mods(api_cache_file:, api_cache_expiry: { games: 1 }).games).to eq games
-        end
-      end
-
-      it 'uses API cache from a file, taking expiry time of the new process into account' do
-        with_api_cache_file do |api_cache_file|
-          expect_validate_user(times: 2)
-          expect_http_call_to(
-            path: '/v1/games.json',
-            json: [
-              json_game100,
-              json_game101
-            ],
-            times: 2
-          )
-          # Generate the cache first
-          games = nexus_mods(api_cache_file:, api_cache_expiry: { games: 10 }).games
-          # Force a new instance of NexusMods API to run
-          reset_nexus_mods
-          sleep 2
-          # Even if the expiry time was 10 seconds while fetching the resource,
-          # if we decide it has to be 1 second now then it has to be invalidated.
-          expect(nexus_mods(api_cache_file:, api_cache_expiry: { games: 1 }).games).to eq games
-        end
-      end
 
       it 'completes the API cache from a file' do
         with_api_cache_file do |api_cache_file|

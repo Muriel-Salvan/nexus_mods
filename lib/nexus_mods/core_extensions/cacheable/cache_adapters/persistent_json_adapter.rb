@@ -13,6 +13,8 @@ module Cacheable
     # * The context information is JSON serializable.
     class PersistentJsonAdapter < MemoryAdapter
 
+      attr_reader :context
+
       # Fetch a key with the givien cache options
       #
       # Parameters::
@@ -86,10 +88,6 @@ module Cacheable
         @cache = loaded_content['cache']
         @context = loaded_content['context']
       end
-
-      private
-
-      attr_reader :context
 
     end
 

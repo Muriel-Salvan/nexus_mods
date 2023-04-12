@@ -5,7 +5,7 @@ module NexusModsTest
     module ModUpdates
 
       # Test mod updates with id 2014
-      def json_mod_updates2014
+      def self.json_mod_updates2014
         {
           'mod_id' => 2014,
           'latest_file_update' => 1_655_813_855,
@@ -13,13 +13,21 @@ module NexusModsTest
         }
       end
 
+      def json_mod_updates2014
+        ModUpdates.json_mod_updates2014
+      end
+
       # Test mod updates with id 100
-      def json_mod_updates100
+      def self.json_mod_updates100
         {
           'mod_id' => 100,
           'latest_file_update' => 1_681_143_964,
           'latest_mod_activity' => 1_681_143_964
         }
+      end
+
+      def json_mod_updates100
+        ModUpdates.json_mod_updates100
       end
 
       # Expect a mod's updates to be the example one with id 2014

@@ -143,6 +143,14 @@ class NexusMods
     end
   end
 
+  # Get the cached timestamp of the list of games
+  #
+  # Result::
+  # * Time or nil: Freshness time of the data in the API cache, or nil if not present in the cache
+  def games_cache_timestamp
+    @api_client.api_cache_timestamp('games')
+  end
+
   # Get information about a mod
   #
   # Parameters::
@@ -183,6 +191,17 @@ class NexusMods
     )
   end
 
+  # Get the cached timestamp of a mod information
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # Result::
+  # * Time or nil: Freshness time of the data in the API cache, or nil if not present in the cache
+  def mod_cache_timestamp(game_domain_name: @game_domain_name, mod_id: @mod_id)
+    @api_client.api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}")
+  end
+
   # Get files belonging to a mod
   #
   # Parameters::
@@ -214,6 +233,17 @@ class NexusMods
     end
   end
 
+  # Get the cached timestamp of a mod files information
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *mod_id* (Integer): The mod ID [default: @mod_id]
+  # Result::
+  # * Time or nil: Freshness time of the data in the API cache, or nil if not present in the cache
+  def mod_files_cache_timestamp(game_domain_name: @game_domain_name, mod_id: @mod_id)
+    @api_client.api_cache_timestamp("games/#{game_domain_name}/mods/#{mod_id}/files")
+  end
+
   # Get a list of updated mod ids since a given time
   #
   # Parameters::
@@ -227,6 +257,43 @@ class NexusMods
   # Result::
   # * Array<ModUpdates>: Mod's updates information
   def updated_mods(game_domain_name: @game_domain_name, since: :one_day, clear_cache: false)
+    @api_client.api("games/#{game_domain_name}/mods/updated", parameters: period_to_url_params(since), clear_cache:).map do |updated_mod_json|
+      Api::ModUpdates.new(
+        mod_id: updated_mod_json['mod_id'],
+        latest_file_update: Time.at(updated_mod_json['latest_file_update']).utc,
+        latest_mod_activity: Time.at(updated_mod_json['latest_mod_activity']).utc
+      )
+    end
+  end
+
+  # Get the cached timestamp of a mod files information
+  #
+  # Parameters::
+  # * *game_domain_name* (String): Game domain name to query by default [default: @game_domain_name]
+  # * *since* (Symbol): The time from which we look for updated mods [default: :one_day]
+  #   Possible values are:
+  #   * *one_day*: Since 1 day
+  #   * *one_week*: Since 1 week
+  #   * *one_month*: Since 1 month
+  # Result::
+  # * Time or nil: Freshness time of the data in the API cache, or nil if not present in the cache
+  def updated_mods_cache_timestamp(game_domain_name: @game_domain_name, since: :one_day)
+    @api_client.api_cache_timestamp("games/#{game_domain_name}/mods/updated", parameters: period_to_url_params(since))
+  end
+
+  private
+
+  # Get the URL parameters from the required period
+  #
+  # Parameters::
+  # * *since* (Symbol): The time from which we look for updated mods
+  #   Possible values are:
+  #   * *one_day*: Since 1 day
+  #   * *one_week*: Since 1 week
+  #   * *one_month*: Since 1 month
+  # Result::
+  # * Hash<Symbol,Object>: Corresponding URL parameters
+  def period_to_url_params(since)
     nexus_mods_period = {
       one_day: '1d',
       one_week: '1w',
@@ -234,13 +301,7 @@ class NexusMods
     }[since]
     raise "Unknown time stamp: #{since}" if nexus_mods_period.nil?
 
-    @api_client.api("games/#{game_domain_name}/mods/updated", parameters: { period: nexus_mods_period }, clear_cache:).map do |updated_mod_json|
-      Api::ModUpdates.new(
-        mod_id: updated_mod_json['mod_id'],
-        latest_file_update: Time.at(updated_mod_json['latest_file_update']).utc,
-        latest_mod_activity: Time.at(updated_mod_json['latest_mod_activity']).utc
-      )
-    end
+    { period: nexus_mods_period }
   end
 
 end
